@@ -6,22 +6,22 @@
 [node name="Guy" type="Node2D"]
 script = ExtResource( 2 )
 
-[node name="Sprite_NW" type="Sprite" parent="."]
+[node name="SpriteNW" type="Sprite" parent="."]
 scale = Vector2( 2, 2 )
 texture = ExtResource( 1 )
 centered = false
 
-[node name="Sprite_NE" type="Sprite" parent="."]
+[node name="SpriteNE" type="Sprite" parent="."]
 scale = Vector2( 2, 2 )
 texture = ExtResource( 1 )
 centered = false
 
-[node name="Sprite_SE" type="Sprite" parent="."]
+[node name="SpriteSE" type="Sprite" parent="."]
 scale = Vector2( 2, 2 )
 texture = ExtResource( 1 )
 centered = false
 
-[node name="Sprite_SW" type="Sprite" parent="."]
+[node name="SpriteSW" type="Sprite" parent="."]
 scale = Vector2( 2, 2 )
 texture = ExtResource( 1 )
 centered = false
