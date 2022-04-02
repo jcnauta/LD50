@@ -158,6 +158,9 @@ func shortest_path(c0, c1):
 
 func add_guys(n_guys):
     for guy_idx in n_guys:
+        var date_pos = passable_coords[randi() % len(passable_coords)]
+        var heart = HeartScene.instance().init(date_pos)
+        $Stuff.add_child(heart)
         var spawn_pos = passable_coords[randi() % len(passable_coords)]
         var guy = GuyScene.instance().init(spawn_pos, self)
         $Guys.add_child(guy)
@@ -173,16 +176,9 @@ func _ready():
     for row in tiles:
         for tile in row:
             $Tiles.add_child(tile)
+            tile.update_sprite()
             
     connect("city_turn_processed", get_node("/root/Game"), "city_turn_processed")
-#    seed(0)
-#    var color_array = [Color.blue, Color.blueviolet, Color.chocolate, Color.darkgreen]
-#    for ttt in range(4):
-#        var test0 = passable_coords[randi() % len(passable_coords)]
-#        var test1 = passable_coords[randi() % len(passable_coords)]
-#        var path = shortest_path(tile_at_coord(test0), tile_at_coord(test1))
-#        for p in path:
-#            p.modulate = color_array[ttt]
     add_guys(1)
 
 func _process(delta):

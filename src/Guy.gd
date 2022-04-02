@@ -62,14 +62,14 @@ func shift_walk():
 
 func do_turn():
     turn_processed = false
+    if dest_coord == null:
+        set_destination(city.random_passable_coord())
     update_path()
     animate_to_move_coord = true
     tile_speed += 1
     animate_speed += 1.5
 
 func _process(delta):
-    if Input.is_physical_key_pressed(KEY_SPACE) and dest_coord == null:
-        set_destination(city.random_passable_coord())
     if animate_to_move_coord:
         if (move_path != null) and (walk_next_idx != null) and (walk_prev_idx != null):
             var walk_pixels = pixel_speed * delta
