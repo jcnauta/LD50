@@ -1,6 +1,7 @@
 extends Node2D
 
 var TileScene = preload("res://src/Tile.tscn")
+var GuyScene = preload("res://src/Guy.tscn")
 
 const street_len_min = 6
 const street_len_max = 12
@@ -11,8 +12,17 @@ const choice_zero = 10
 var generate_timeout_max = 0.2
 var generate_timeout = generate_timeout_max
 
+func pos_to_float_coord(pos):
+    return pos / G.tile_dim
+
+func random_passable_coord():
+    return passable_coords[randi() % len(passable_coords)]
+
 func random_coord():
     return Vector2(randi() % G.grid_dim, randi() % G.grid_dim)
+
+func tile_at_coord(coord):
+    return tiles[coord.y][coord.x]
 
 func add_coords(c0, c1):
     var c_new = c0 + c1
@@ -87,7 +97,7 @@ func generate_street():
 
 func add_street_segment(segment):
     for coord in segment:
-        tiles[coord.y][coord.x].set_passable(true)
+        tile_at_coord(coord).set_passable(true)
         passable_coords.append(coord)
 
 func generate_streets(n_tries):
@@ -108,45 +118,60 @@ func get_unvisited_neighs(tile):
     var unvisited = []
     for dir in G.dirs4:
         var neigh_coord = add_coords(tile.coord, dir)
-        var neigh = tiles[neigh_coord.y][neigh_coord.x]
+        var neigh = tile_at_coord(neigh_coord)
         if neigh.passable and neigh.visited_from == null:
             unvisited.append(neigh)
     return unvisited
 
 func shortest_path(c0, c1):
+    if c0 == c1:
+        return []
+    elif c0 == null or c1 == null:
+        return null
+    # Reset DFS info
     for row in tiles:
         for tile in row:
             tile.visited_from = null
+    # Start search
     var queue = [c0]
     var found = false
-    while not found:
-        var popped = queue.pop_front()
-        if popped == c1:
+    while not found and len(queue) > 0:
+        var popped_coord = queue.pop_front()
+        var popped_tile = tile_at_coord(popped_coord)
+        if popped_coord == c1:
             var path = [c1]
-            var prev = c1.visited_from
+            var prev = tile_at_coord(c1).visited_from
             while true:
-                path.append(prev)
-                if prev == c0:
+                path.append(prev.coord)
+                if prev.coord == c0:
                     path.invert()
                     return path
                 prev = prev.visited_from
-        for unvisited in get_unvisited_neighs(popped):
-            unvisited.visited_from = popped
-            queue.append(unvisited)
+        for unvisited in get_unvisited_neighs(popped_tile):
+            unvisited.visited_from = popped_tile
+            queue.append(unvisited.coord)
+    return null
+
+func add_guys(n_guys):
+    for guy_idx in n_guys:
+        var spawn_pos = passable_coords[randi() % len(passable_coords)]
+        var guy = GuyScene.instance().init(spawn_pos, self)
+        $Guys.add_child(guy)
 
 func _ready():
     generate_city(70, 2)
     for row in tiles:
         for tile in row:
             $Tiles.add_child(tile)
-    seed(0)
-    var color_array = [Color.blue, Color.blueviolet, Color.chocolate, Color.darkgreen]
-    for ttt in range(4):
-        var test0 = passable_coords[randi() % len(passable_coords)]
-        var test1 = passable_coords[randi() % len(passable_coords)]
-        var path = shortest_path(tiles[test0.y][test0.x], tiles[test1.y][test1.x])
-        for p in path:
-            p.modulate = color_array[ttt]
+#    seed(0)
+#    var color_array = [Color.blue, Color.blueviolet, Color.chocolate, Color.darkgreen]
+#    for ttt in range(4):
+#        var test0 = passable_coords[randi() % len(passable_coords)]
+#        var test1 = passable_coords[randi() % len(passable_coords)]
+#        var path = shortest_path(tile_at_coord(test0), tile_at_coord(test1))
+#        for p in path:
+#            p.modulate = color_array[ttt]
+    add_guys(1)
 
 #func _process(delta):
 #    generate_timeout -= delta
