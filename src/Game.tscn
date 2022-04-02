@@ -1,14 +1,18 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://src/City.tscn" type="PackedScene" id=1]
 [ext_resource path="res://fonts/SendFlowers-Regular.ttf" type="DynamicFontData" id=2]
-[ext_resource path="res://src/SidebarCounter.tscn" type="PackedScene" id=3]
+[ext_resource path="res://src/BtnIcecream.tscn" type="PackedScene" id=3]
+[ext_resource path="res://src/BtnEndTurn.tscn" type="PackedScene" id=4]
+[ext_resource path="res://src/BtnEndTurn.gd" type="Script" id=5]
+[ext_resource path="res://src/Game.gd" type="Script" id=6]
 
 [sub_resource type="DynamicFont" id=1]
 size = 32
 font_data = ExtResource( 2 )
 
 [node name="Game" type="Node2D"]
+script = ExtResource( 6 )
 
 [node name="City" parent="." instance=ExtResource( 1 )]
 
@@ -37,12 +41,11 @@ text = "Love Finds A Way"
 fit_content_height = true
 scroll_active = false
 
-[node name="SidebarCounter" parent="UI/VBoxContainer" instance=ExtResource( 3 )]
+[node name="IcecreamBtn" parent="UI/VBoxContainer" instance=ExtResource( 3 )]
+margin_top = 94.0
+margin_bottom = 174.0
 
-[node name="SidebarCounter2" parent="UI/VBoxContainer" instance=ExtResource( 3 )]
-margin_top = 154.0
-margin_bottom = 210.0
-
-[node name="SidebarCounter3" parent="UI/VBoxContainer" instance=ExtResource( 3 )]
-margin_top = 214.0
-margin_bottom = 270.0
+[node name="EndTurnBtn" parent="UI/VBoxContainer" instance=ExtResource( 4 )]
+margin_top = 178.0
+margin_bottom = 258.0
+script = ExtResource( 5 )

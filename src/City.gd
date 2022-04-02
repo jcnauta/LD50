@@ -1,5 +1,7 @@
 extends Node2D
 
+signal city_turn_processed
+
 var TileScene = preload("res://src/Tile.tscn")
 var GuyScene = preload("res://src/Guy.tscn")
 
@@ -11,6 +13,8 @@ const choice_zero = 10
 
 var generate_timeout_max = 0.2
 var generate_timeout = generate_timeout_max
+
+var turn_processed = true
 
 func pos_to_float_coord(pos):
     return pos / G.tile_dim
@@ -158,11 +162,19 @@ func add_guys(n_guys):
         var guy = GuyScene.instance().init(spawn_pos, self)
         $Guys.add_child(guy)
 
+func end_turn():
+    print("End turn")
+    turn_processed = false
+    for guy in $Guys.get_children():
+        guy.do_turn()
+
 func _ready():
     generate_city(70, 2)
     for row in tiles:
         for tile in row:
             $Tiles.add_child(tile)
+            
+    connect("city_turn_processed", get_node("/root/Game"), "city_turn_processed")
 #    seed(0)
 #    var color_array = [Color.blue, Color.blueviolet, Color.chocolate, Color.darkgreen]
 #    for ttt in range(4):
@@ -173,7 +185,16 @@ func _ready():
 #            p.modulate = color_array[ttt]
     add_guys(1)
 
-#func _process(delta):
+func _process(delta):
+    if not turn_processed:
+        turn_processed = true
+        for guy in $Guys.get_children():
+            if not guy.turn_processed:
+                turn_processed = false
+                break
+        if turn_processed:
+            emit_signal("city_turn_processed")
+        
 #    generate_timeout -= delta
 #    if generate_timeout < 0:
 #        print("generating")
