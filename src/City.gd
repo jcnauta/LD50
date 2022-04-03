@@ -19,6 +19,7 @@ var spawn_coords = []
 var generate_timeout = generate_timeout_max
 var turn_processed = true
 var level_lost = false
+var click_mode = "icecream"
 
 func pos_to_float_coord(pos):
     return pos / G.tile_dim
@@ -30,6 +31,10 @@ func random_coord():
     return Vector2(randi() % G.grid_dim, randi() % G.grid_dim)
 
 func tile_at_coord(coord):
+    if coord.y >= len(tiles):
+        return null
+    elif coord.x >= len(tiles[coord.y]):
+        return null
     return tiles[coord.y][coord.x]
 
 func add_coords(c0, c1):
@@ -208,13 +213,16 @@ func add_guys(n_guys):
         $Stuff.add_child(date)
         var guy = GuyScene.instance().init(spawn_coord, self, date)
         $Guys.add_child(guy)
-        
-
 
 func end_turn():
     turn_processed = false
     for guy in $Guys.get_children():
         guy.do_turn()
+
+func tile_at_pos(mouse_pos):
+    var coord_vec = mouse_pos / G.tile_dim
+    coord_vec = coord_vec.floor()
+    return tile_at_coord(coord_vec)
 
 func _process(delta):
     if not turn_processed:
@@ -232,7 +240,11 @@ func _process(delta):
                     break
         if turn_processed:
             emit_signal("city_turn_processed")
-        
+    if click_mode == "icecream":
+        var mouse_pos = get_viewport().get_mouse_position()
+        var hovered_tile = tile_at_pos(mouse_pos)
+        if hovered_tile != null:
+            hovered_tile.modulate = Color.black
 #    generate_timeout -= delta
 #    if generate_timeout < 0:
 #        print("generating")

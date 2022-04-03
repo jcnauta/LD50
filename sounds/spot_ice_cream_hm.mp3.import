@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/spot_ice_cream_hm.mp3-ce6203ad2ff912e79e840a1ac92f0e27.mp3str"
+
+[deps]
+
+source_file="res://sounds/spot_ice_cream_hm.mp3"
+dest_files=[ "res://.import/spot_ice_cream_hm.mp3-ce6203ad2ff912e79e840a1ac92f0e27.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0

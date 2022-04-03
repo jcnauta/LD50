@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/find_love_loewi.mp3-3561b3b3a1e462db5ea8213612b65bc4.mp3str"
+
+[deps]
+
+source_file="res://sounds/find_love_loewi.mp3"
+dest_files=[ "res://.import/find_love_loewi.mp3-3561b3b3a1e462db5ea8213612b65bc4.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0

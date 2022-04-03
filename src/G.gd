@@ -6,13 +6,13 @@ const tile_dim = 36
 var levels = [
     {"seed": 1, "streets": 70, "guys": 1}, # 1
     {"seed": 2, "streets": 40, "guys": 2},
-    {"seed": 3, "streets": 100, "guys": 2},
-    {"seed": 4, "streets": 70, "guys": 3},
-    {"seed": 5, "streets": 70, "guys": 3}, # 5
-    {"seed": 6, "streets": 70, "guys": 4},
-    {"seed": 7, "streets": 70, "guys": 5},
-    {"seed": 8, "streets": 70, "guys": 5},
-    {"seed": 9, "streets": 70, "guys": 6}, # 9
+#    {"seed": 3, "streets": 100, "guys": 2},
+#    {"seed": 4, "streets": 70, "guys": 3},
+#    {"seed": 5, "streets": 70, "guys": 3}, # 5
+#    {"seed": 6, "streets": 70, "guys": 4},
+#    {"seed": 7, "streets": 70, "guys": 5},
+#    {"seed": 8, "streets": 70, "guys": 5},
+#    {"seed": 9, "streets": 70, "guys": 6}, # 9
    ]
 
 const dirs4 = [

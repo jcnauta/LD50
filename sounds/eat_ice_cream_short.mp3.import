@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/eat_ice_cream_short.mp3-fdfef7cea60be2d1227d925e5b2d2431.mp3str"
+
+[deps]
+
+source_file="res://sounds/eat_ice_cream_short.mp3"
+dest_files=[ "res://.import/eat_ice_cream_short.mp3-fdfef7cea60be2d1227d925e5b2d2431.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0

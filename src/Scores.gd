@@ -31,17 +31,23 @@ func show_scores(turns_per_level, current_level):
             level_nums.bbcode_text += "[/color]"
             turn_nums.bbcode_text += "[/color]"
         total_turns += turns_per_level[lvl]
-    level_nums.bbcode_text += "Neighborhood " + str(len(turns_per_level) + 1) + "\n"
-    turn_nums.bbcode_text += "-\n"
+    # ADD NEXT LEVEL AND TOTAL
+    if len(turns_per_level) < len(G.levels):
+        level_nums.bbcode_text += "Neighborhood " + str(len(turns_per_level) + 1) + "\n"
+        turn_nums.bbcode_text += "-\n"
     level_nums.bbcode_text += "\nTOTAL: "
     turn_nums.bbcode_text += "\n" + str(total_turns) + " turns[/right]"
+    # ADD BUTTONS
     var buttons = $VBoxContainer/HBoxContainer/Buttons
     for ch in buttons.get_children():
         buttons.remove_child(ch)
     var margin = MarginContainer.new()
     margin.rect_min_size.y = 11
     buttons.add_child(margin)
-    for lvl_nr in len(turns_per_level) + 1:
+    var buttons_to_add = len(turns_per_level)
+    if len(turns_per_level) < len(G.levels):
+        buttons_to_add += 1
+    for lvl_nr in buttons_to_add:
         var new_button = Button.new()
         new_button.text = "Play"
         buttons.add_child(new_button)

@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/place_blockade_single_sound.mp3-dbed541d00a2cff0b91060e26586edbf.mp3str"
+
+[deps]
+
+source_file="res://sounds/place_blockade_single_sound.mp3"
+dest_files=[ "res://.import/place_blockade_single_sound.mp3-dbed541d00a2cff0b91060e26586edbf.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0

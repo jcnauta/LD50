@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/find_love_cow.mp3-ee492ee6275084d4770a21aec4b6f162.mp3str"
+
+[deps]
+
+source_file="res://sounds/find_love_cow.mp3"
+dest_files=[ "res://.import/find_love_cow.mp3-ee492ee6275084d4770a21aec4b6f162.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0
