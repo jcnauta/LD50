@@ -4,8 +4,9 @@ var passable = false
 var coord
 var visited_from = null  # For depth-first search
 var city
-var road_tex
-var house_tex
+
+const house_img = preload("res://img/house_pale.png")
+const road_img = preload("res://img/Street_really_all_for_now.png")
 
 func init(init_coord):
     self.coord = init_coord
@@ -15,18 +16,13 @@ func init(init_coord):
 
 func _ready():
     city = get_node("/root/Game/City")
-    house_tex = ImageTexture.new()
-    var house_img = Image.new()
-    house_img.load("res://img/house_2.png")
-    house_tex.create_from_image(house_img, 3)
-    $SpriteHouse.texture = house_tex
+    
+    house_img.flags = 3
+    $SpriteHouse.texture = house_img
     $SpriteHouse.visible = true
     
-    road_tex = ImageTexture.new()
-    var road_img = Image.new()
-    road_img.load("res://img/Street_really_all_for_now.png")
-    road_tex.create_from_image(road_img, 3)
-    $SpriteRoad.texture = road_tex
+    road_img.flags = 3
+    $SpriteRoad.texture = road_img
     $SpriteRoad.visible = false
 
 func set_passable(may_pass):
@@ -36,7 +32,7 @@ func update_sprite():
     if passable:
         $SpriteHouse.visible = false
         $SpriteRoad.visible = true
-        $SpriteRoad.texture = road_tex
+        $SpriteRoad.texture = road_img
         $SpriteRoad.modulate = Color.white
         var neighs = {}
         for dir in G.dirs4:

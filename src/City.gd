@@ -6,6 +6,8 @@ signal lose_level
 var TileScene = preload("res://src/Tile.tscn")
 var GuyScene = preload("res://src/Guy.tscn")
 var HeartScene = preload("res://src/Heart.tscn")
+var IcecreamScene = preload("res://src/Icecream.tscn")
+var RoadblockScene = preload("res://src/Roadblock.tscn")
 
 const street_len_min = 6
 const street_len_max = 12
@@ -19,7 +21,11 @@ var spawn_coords = []
 var generate_timeout = generate_timeout_max
 var turn_processed = true
 var level_lost = false
-var click_mode = "icecream"
+var click_mode = "roadblock" # {icecream, roadblock, dateswap, null}
+var icecream_preview
+var icecream_img = preload("res://img/icecream.png")
+var roadblock_preview
+var roadblock_img = preload("res://img/roadblock.png")
 
 func pos_to_float_coord(pos):
     return pos / G.tile_dim
@@ -224,6 +230,21 @@ func tile_at_pos(mouse_pos):
     coord_vec = coord_vec.floor()
     return tile_at_coord(coord_vec)
 
+func passable_under_mouse():
+    var mouse_pos = get_viewport().get_mouse_position()
+    var hovered_tile = tile_at_pos(mouse_pos)
+    if hovered_tile != null and hovered_tile.coord in passable_coords:
+        return hovered_tile
+    else:
+        return null
+
+func set_mode(new_mode):
+    icecream_preview.visible = false
+
+func _ready():
+    icecream_preview = $Preview/Icecream
+    icecream_img.flags = 3
+
 func _process(delta):
     if not turn_processed:
         turn_processed = true
@@ -240,13 +261,35 @@ func _process(delta):
                     break
         if turn_processed:
             emit_signal("city_turn_processed")
-    if click_mode == "icecream":
-        var mouse_pos = get_viewport().get_mouse_position()
-        var hovered_tile = tile_at_pos(mouse_pos)
-        if hovered_tile != null:
-            hovered_tile.modulate = Color.black
+    
+    var hovered_tile = passable_under_mouse()
+    if hovered_tile != null:
+        if click_mode == "icecream":
+            icecream_preview.position = hovered_tile.position
+            icecream_preview.visible = true
+        else:
+            icecream_preview.visible = false
+        if click_mode == "roadblock":
+            roadblock_preview.position = hovered_tile.position
+            roadblock_preview.visible = true
+        else:
+            roadblock_preview.visible = false
+        
 #    generate_timeout -= delta
 #    if generate_timeout < 0:
 #        print("generating")
 #        generate_timeout += generate_timeout_max
 #        generate_street()
+
+func _input(event):
+    if event is InputEventMouseButton and event.button_index == BUTTON_LEFT and event.pressed:
+        var hovered_tile = passable_under_mouse()
+        if hovered_tile != null:
+            if click_mode == "icecream":
+                var new_icecream = IcecreamScene.instance()
+                new_icecream.position = hovered_tile.position
+                $Stuff.add_child(new_icecream)
+            elif click_mode == "roadblock":
+                var new_roadblock = RoadblockScene.instance()
+                new_roadblock.position = hovered_tile.position
+                $Stuff.add_child(new_roadblock)
