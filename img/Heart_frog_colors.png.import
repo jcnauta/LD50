@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/button_bg.png-3ba944f2e120b9662c88c8ae43dd9cff.stex"
+path="res://.import/Heart_frog_colors.png-711097c30e861a281e7c797e38dd135d.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://img/button_bg.png"
-dest_files=[ "res://.import/button_bg.png-3ba944f2e120b9662c88c8ae43dd9cff.stex" ]
+source_file="res://img/Heart_frog_colors.png"
+dest_files=[ "res://.import/Heart_frog_colors.png-711097c30e861a281e7c797e38dd135d.stex" ]
 
 [params]
 

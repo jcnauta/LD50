@@ -1,20 +1,24 @@
 extends Node2D
 
 signal city_turn_processed
+signal lose_level
 
 var TileScene = preload("res://src/Tile.tscn")
 var GuyScene = preload("res://src/Guy.tscn")
+var HeartScene = preload("res://src/Heart.tscn")
 
 const street_len_min = 6
 const street_len_max = 12
+const choice_zero = 10
+const generate_timeout_max = 0.2
+
 var tiles = []
 var passable_coords = []
-const choice_zero = 10
-
-var generate_timeout_max = 0.2
+var date_coords = []
+var spawn_coords = []
 var generate_timeout = generate_timeout_max
-
 var turn_processed = true
+var level_lost = false
 
 func pos_to_float_coord(pos):
     return pos / G.tile_dim
@@ -108,15 +112,37 @@ func generate_streets(n_tries):
     for add_street_iter in range(n_tries):
         generate_street()
 
-func generate_city(n_street_attempts = 0, randness = 0):
-    seed(randness)
+func reset_city():
+    var child_containers = [$Tiles, $Stuff, $Guys]
+    for child_container in child_containers:
+        for child in child_container.get_children():
+           child.queue_free()
+    tiles = []
+    passable_coords = []
+    date_coords = []
+    spawn_coords = []
+    generate_timeout = generate_timeout_max
+    turn_processed = true
+    level_lost = false
+
+func generate_city(level_nr):
+    reset_city()
+    seed(G.levels[level_nr - 1].seed)
     for row in range(G.grid_dim):
         var new_row = []
         for col in range(G.grid_dim):
             var new_tile = TileScene.instance().init(Vector2(col, row))
             new_row.append(new_tile)
         tiles.append(new_row)
-    generate_streets(n_street_attempts)
+    generate_streets(G.levels[level_nr - 1].streets)
+    # Actually add tiles
+    for row in tiles:
+        for tile in row:
+            $Tiles.add_child(tile)
+            tile.update_sprite()
+    connect("city_turn_processed", get_node("/root/Game"), "city_turn_processed")
+    add_guys(G.levels[level_nr - 1].guys)
+    
 
 func get_unvisited_neighs(tile):
     var unvisited = []
@@ -156,38 +182,54 @@ func shortest_path(c0, c1):
             queue.append(unvisited.coord)
     return null
 
+func free_passable():
+    var coord = passable_coords[randi() % len(passable_coords)]
+    var safety = 100
+    while coord in date_coords or coord in spawn_coords:
+        coord = passable_coords[randi() % len(passable_coords)]
+        print(coord)
+        safety -= 1
+        if safety == 0:
+            return null
+    return coord
+
 func add_guys(n_guys):
     for guy_idx in n_guys:
-        var date_pos = passable_coords[randi() % len(passable_coords)]
-        var heart = HeartScene.instance().init(date_pos)
-        $Stuff.add_child(heart)
-        var spawn_pos = passable_coords[randi() % len(passable_coords)]
-        var guy = GuyScene.instance().init(spawn_pos, self)
+        var date_coord
+        var spawn_coord
+        for try_different in range(4):
+            date_coord = free_passable()
+            spawn_coord = free_passable()
+            if date_coord != null and spawn_coord != null and (date_coord != spawn_coord):
+                break 
+        date_coords.append(date_coord)
+        spawn_coords.append(spawn_coord)
+        var date = HeartScene.instance().init(date_coord)
+        $Stuff.add_child(date)
+        var guy = GuyScene.instance().init(spawn_coord, self, date)
         $Guys.add_child(guy)
+        
+
 
 func end_turn():
-    print("End turn")
     turn_processed = false
     for guy in $Guys.get_children():
         guy.do_turn()
 
-func _ready():
-    generate_city(70, 2)
-    for row in tiles:
-        for tile in row:
-            $Tiles.add_child(tile)
-            tile.update_sprite()
-            
-    connect("city_turn_processed", get_node("/root/Game"), "city_turn_processed")
-    add_guys(1)
-
 func _process(delta):
     if not turn_processed:
         turn_processed = true
-        for guy in $Guys.get_children():
-            if not guy.turn_processed:
-                turn_processed = false
-                break
+        var guys = $Guys.get_children()
+        if len(guys) == 0:
+            turn_processed = false
+            if level_lost == false:
+                level_lost = true
+                emit_signal("lose_level")
+        else:
+            for guy in $Guys.get_children():
+                if not guy.turn_processed or guy.love_found:
+                    turn_processed = false
+                    break
         if turn_processed:
             emit_signal("city_turn_processed")
         

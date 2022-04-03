@@ -13,6 +13,9 @@ func init(init_coord):
 
 func _ready():
     city = get_node("/root/Game/City")
+    var house_tex = ImageTexture.new()
+    var house_img = Image.new()
+#    house_img.load("res://img/")
 
 func set_passable(may_pass):
     passable = may_pass
