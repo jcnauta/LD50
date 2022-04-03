@@ -23,9 +23,7 @@ var turn_processed = true
 var level_lost = false
 var click_mode = "roadblock" # {icecream, roadblock, dateswap, null}
 var icecream_preview
-var icecream_img = preload("res://img/icecream.png")
 var roadblock_preview
-var roadblock_img = preload("res://img/roadblock.png")
 
 func pos_to_float_coord(pos):
     return pos / G.tile_dim
@@ -240,10 +238,11 @@ func passable_under_mouse():
 
 func set_mode(new_mode):
     icecream_preview.visible = false
+    roadblock_preview.visible = false
 
 func _ready():
     icecream_preview = $Preview/Icecream
-    icecream_img.flags = 3
+    roadblock_preview = $Preview/Roadblock
 
 func _process(delta):
     if not turn_processed:
@@ -286,10 +285,14 @@ func _input(event):
         var hovered_tile = passable_under_mouse()
         if hovered_tile != null:
             if click_mode == "icecream":
-                var new_icecream = IcecreamScene.instance()
-                new_icecream.position = hovered_tile.position
-                $Stuff.add_child(new_icecream)
+                if hovered_tile.can_icecream():
+                    var new_icecream = IcecreamScene.instance()
+                    new_icecream.position = hovered_tile.position
+                    $Stuff.add_child(new_icecream)
+                    hovered_tile.icecream = new_icecream
             elif click_mode == "roadblock":
-                var new_roadblock = RoadblockScene.instance()
-                new_roadblock.position = hovered_tile.position
-                $Stuff.add_child(new_roadblock)
+                if hovered_tile.can_roadblock():
+                    var new_roadblock = RoadblockScene.instance()
+                    new_roadblock.position = hovered_tile.position
+                    $Stuff.add_child(new_roadblock)
+                    hovered_tile.roadblock = new_roadblock

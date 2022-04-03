@@ -1,12 +1,20 @@
 extends Node2D
 
+
+const house_img = preload("res://img/house_pale.png")
+const road_img = preload("res://img/Street_really_all_for_now.png")
+
 var passable = false
+var placeable = false
 var coord
 var visited_from = null  # For depth-first search
 var city
 
-const house_img = preload("res://img/house_pale.png")
-const road_img = preload("res://img/Street_really_all_for_now.png")
+# Stuff (may be mutually exclusive) on this tile
+var icecream = null
+var roadblock = null
+var date = null
+var characters = []
 
 func init(init_coord):
     self.coord = init_coord
@@ -27,7 +35,13 @@ func _ready():
 
 func set_passable(may_pass):
     passable = may_pass
-    
+
+func can_roadblock():
+    return icecream == null and roadblock == null and date == null and characters.empty()
+
+func can_icecream():
+    return icecream == null and roadblock == null
+
 func update_sprite():
     if passable:
         $SpriteHouse.visible = false
