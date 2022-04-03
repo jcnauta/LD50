@@ -16,14 +16,26 @@ var animate_to_move_coord = false
 var turn_processed = false
 var date = null
 var love_found = false
+var guy_type
 
-func init(coord, city, date):
-    self.city = city
-    set_date(date)
-    set_coord(coord)
+func _ready():
+    $PathPreview.set_as_toplevel(true)
+
+func init(new_coord, new_city, new_date, new_guy_type):
+    city = new_city
+    set_date(new_date)
+    set_coord(new_coord)
+    set_guy_type(new_guy_type)
+    update_path()
+    show_path_preview()
     return self
 
 func set_coord(new_coord):
+    if coord != null:
+        var old_tile = city.tile_at_coord(coord)
+        old_tile.remove_guy(self)
+    var new_tile = city.tile_at_coord(new_coord)
+    new_tile.add_guy(self)
     self.coord = new_coord
     self.position = new_coord * G.tile_dim
     if self.coord == date.coord:
@@ -40,44 +52,81 @@ func found_love():
     $Tween.connect("tween_all_completed", self, "queue_free")
     $Tween.start()
 
-func set_destination(coord):
-    if dest_coord != coord:
-        dest_coord = coord
+func set_destination(new_coord):
+    if dest_coord != new_coord:
+        dest_coord = new_coord
         
-func set_date(date):
-    self.date = date
-    set_destination(date.coord)
+func set_date(new_date):
+    self.date = new_date
+    set_destination(new_date.coord)
+
+func set_guy_type(new_type):
+    guy_type = new_type
+    for spr in $Sprites.get_children():
+        spr.visible = false
+    if guy_type == "lion":
+        $Sprites/Lion.visible = true
+    if guy_type == "frog":
+        $Sprites/Frog.visible = true
+    if guy_type == "robot":
+        $Sprites/Robot.visible = true
+    if guy_type == "penguin":
+        $Sprites/Penguin.visible = true
 
 func update_path():
+    full_path = []
+    var date_path = city.shortest_path(coord, dest_coord)
+    move_path = date_path.slice(0, min(tile_speed, len(date_path) - 1))
+    var icecream_path = city.shortest_path(move_path, null, G.max_icecream_path_length, true)
+    if icecream_path != null:
+        full_path.append_array(icecream_path)
     if dest_coord != null:
-        full_path = city.shortest_path(self.coord, dest_coord)
+        if len(full_path) == 0:
+            full_path.append_array(date_path)
+        else:
+            var path_from_icecream = city.shortest_path(full_path.back(), dest_coord)
+            if path_from_icecream != null:
+                full_path.append_array(path_from_icecream.slice(1, len(path_from_icecream)))
         for p in full_path:
             var tile = city.tile_at_coord(p)
-            tile.modulate = Color.green
+#            tile.modulate = Color.green
         if len(full_path) > 1:
             move_path = full_path.slice(0, min(tile_speed, len(full_path) - 1))
             walk_prev_idx = 0
             walk_next_idx = 1
         else:
             turn_processed = true
-    else:
-        full_path = []
+    if len(full_path) == 0:
         move_path = []
         walk_prev_idx = null
         walk_next_idx = null
         turn_processed = true
 
+func show_path_preview():
+    for c in $PathPreview.get_children():
+        c.queue_free()
+    for c in full_path:
+        var path_dot = ColorRect.new()
+        path_dot.rect_size = Vector2(10, 10)
+        path_dot.color = G.guy_colors[guy_type]
+        path_dot.modulate = Color(1, 1, 1, 0.5)
+        path_dot.rect_position = c * G.tile_dim + Vector2(13, 13) + G.guy_path_offset[guy_type]
+        $PathPreview.add_child(path_dot)
+        print("added child")
+
 func shift_walk():
-    if walk_next_idx < len(move_path) - 1:
-        walk_prev_idx += 1
-        walk_next_idx += 1
-        return false
-    else:
+    if walk_next_idx >= len(move_path) - 1:
         # We reached the move destination
         set_coord(move_path[len(move_path) - 1])
         walk_prev_idx = walk_next_idx
         return true
-
+    else:
+        walk_prev_idx += 1
+        walk_next_idx += 1
+        if city.tile_at_coord(move_path[walk_prev_idx]).icecream != null:
+            set_coord(move_path[walk_prev_idx])
+            return true
+        return false
 
 func do_turn():
     turn_processed = false

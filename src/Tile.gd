@@ -8,13 +8,14 @@ var passable = false
 var placeable = false
 var coord
 var visited_from = null  # For depth-first search
+var path_length = null  # For ice cream search
 var city
 
 # Stuff (may be mutually exclusive) on this tile
 var icecream = null
 var roadblock = null
 var date = null
-var characters = []
+var guys = []
 
 func init(init_coord):
     self.coord = init_coord
@@ -37,10 +38,34 @@ func set_passable(may_pass):
     passable = may_pass
 
 func can_roadblock():
-    return icecream == null and roadblock == null and date == null and characters.empty()
+    return icecream == null and roadblock == null and date == null and guys.empty()
 
 func can_icecream():
     return icecream == null and roadblock == null
+
+func set_icecream(new_icecream):
+    assert(can_icecream())
+    icecream = new_icecream
+    
+func set_roadblock(new_roadblock):
+    assert(can_roadblock())
+    roadblock = new_roadblock
+    set_passable(false)
+
+func add_guy(guy):
+    assert(guys.find(guy) == -1)
+    guys.append(guy)
+
+func remove_guy(guy):
+    guys.remove(guys.find(guy))
+
+func set_date(new_date):
+    assert(date == null)
+    date = new_date
+    
+func clear_date(old_date):
+    assert(date == old_date)
+    date = null
 
 func update_sprite():
     if passable:

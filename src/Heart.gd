@@ -1,15 +1,27 @@
 extends Node2D
 
+var city
 var coord = null
 var love_found = false
+var guy_type
 
-func init(coord):
-    set_coord(coord)
+func init(new_date, new_city):
+    city = new_city
+    set_coord(new_date)
     return self
 
 func set_coord(new_coord):
-    self.coord = new_coord
-    self.position = new_coord * G.tile_dim
+    if coord != null:
+        var old_tile = city.tile_at_coord(coord)
+        old_tile.clear_date(self)
+    var new_tile = city.tile_at_coord(new_coord)
+    new_tile.set_date(self)
+    coord = new_coord
+    position = new_coord * G.tile_dim
+
+func set_guy_type(new_type):
+    guy_type = new_type
+    $SpriteAnimation.animation = new_type
 
 func found_love():
     if love_found:

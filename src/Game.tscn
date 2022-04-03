@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=16 format=2]
 
 [ext_resource path="res://src/City.tscn" type="PackedScene" id=1]
 [ext_resource path="res://fonts/SendFlowers-Regular.ttf" type="DynamicFontData" id=2]
@@ -10,6 +10,7 @@
 [ext_resource path="res://img/Background_ice_cream.png" type="Texture" id=8]
 [ext_resource path="res://fonts/Mukta/Mukta-Regular.ttf" type="DynamicFontData" id=9]
 [ext_resource path="res://src/Scores.gd" type="Script" id=10]
+[ext_resource path="res://src/BtnRoadblock.tscn" type="PackedScene" id=11]
 
 [sub_resource type="DynamicFont" id=1]
 size = 32
@@ -74,9 +75,13 @@ fit_content_height = true
 margin_top = 168.0
 margin_bottom = 248.0
 
-[node name="EndTurnBtn" parent="UI/VBoxContainer" instance=ExtResource( 4 )]
+[node name="RoadblockBtn" parent="UI/VBoxContainer" instance=ExtResource( 11 )]
 margin_top = 252.0
 margin_bottom = 332.0
+
+[node name="EndTurnBtn" parent="UI/VBoxContainer" instance=ExtResource( 4 )]
+margin_top = 336.0
+margin_bottom = 416.0
 
 [node name="Scores" type="Control" parent="UI"]
 visible = false

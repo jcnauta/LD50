@@ -78,10 +78,10 @@ func generate_street():
     # For fixed number of iterations, pick unpassable tile
     # and try to extend street segment to existing passable.
     # Guarantees connectedness of the final street grid.
-    for generate_try in range(100):
+    for _generate_try in range(100):
         # Pick unpassable coordinate to start from
         var start_coord = null
-        for try_unpassable in range(10):
+        for _try_unpassable in range(10):
             start_coord = random_coord()
             if not has_unpassable_neighborhood(start_coord):
                 continue
@@ -90,7 +90,7 @@ func generate_street():
         # Generate segment from here, in both directions
         var dir = G.random_dir()
         var total_segment = []
-        for both_dirs in range(2):
+        for _both_dirs in range(2):
             var segment = [start_coord]
             dir = -dir
             var this_coord = add_coords(start_coord, dir)
@@ -118,11 +118,11 @@ func add_street_segment(segment):
         passable_coords.append(coord)
 
 func generate_streets(n_tries):
-    for add_street_iter in range(n_tries):
+    for _add_street_iter in range(n_tries):
         generate_street()
 
 func reset_city():
-    var child_containers = [$Tiles, $Stuff, $Guys]
+    var child_containers = [$Tiles, $Icecreams, $Roadblocks, $Guys]
     for child_container in child_containers:
         for child in child_container.get_children():
            child.queue_free()
@@ -162,41 +162,98 @@ func get_unvisited_neighs(tile):
             unvisited.append(neigh)
     return unvisited
 
-func shortest_path(c0, c1):
-    if c0 == c1:
-        return []
-    elif c0 == null or c1 == null:
-        return null
-    # Reset DFS info
+func reset_path_search():
     for row in tiles:
         for tile in row:
             tile.visited_from = null
+            tile.path_length = null
+
+func shortest_path(c0, c1, max_length=INF, find_icecream=false):
+    # If c0 is a Vector2D:
+    #   Returns the shortest path between c0 and c1 as a list of coordinates including c0 and c1.
+    #   Returns an empty path if c0 == c1
+    # If c0 is an array of Vector2D:
+    #   Returns the shortest path from any node on c0 to c1, starting from c0[0].
+    #   Returns an empty path if c1 is on c0
+    # Returns null if no path of length < max_length is possible
+    # or c0 or c1 is null and find_icecream is false
+    
+    if c0 == c1:
+        return []
+    elif c0 == null or (c1 == null and not find_icecream):
+        return null
+    reset_path_search()
     # Start search
-    var queue = [c0]
-    var found = false
-    while not found and len(queue) > 0:
+    var queue = []
+    if typeof(c0) == TYPE_VECTOR2:
+        var tile0 = tile_at_coord(c0)
+        tile0.path_length = 0
+        tile0.visited_from = tile0
+        queue = [c0]
+    elif typeof(c0) == TYPE_ARRAY:
+        for c in c0:
+            var t = tile_at_coord(c)
+            t.path_length = 0
+            t.visited_from = t
+            queue.append(c)
+    var add_count = 0
+    while len(queue) > 0:
         var popped_coord = queue.pop_front()
         var popped_tile = tile_at_coord(popped_coord)
-        if popped_coord == c1:
-            var path = [c1]
-            var prev = tile_at_coord(c1).visited_from
+        if (c1 != null and popped_coord == c1) or \
+            (find_icecream and popped_tile.icecream != null):
+            var path = [popped_coord]
+            var prev = popped_tile.visited_from
             while true:
                 path.append(prev.coord)
-                if prev.coord == c0:
+                if prev.path_length == 0:
                     path.invert()
+                    if typeof(c0) == TYPE_ARRAY:
+                        # Add prefix of c0 until the start of the shortest path.
+                        var branch_off_idx = c0.find(prev.coord)
+                        if branch_off_idx > 0:
+                            var prefix = c0.slice(0, branch_off_idx - 1)
+                            prefix.append_array(path)
+                            path = prefix
                     return path
+                if prev == prev.visited_from:
+                    assert(false)
                 prev = prev.visited_from
-        for unvisited in get_unvisited_neighs(popped_tile):
-            unvisited.visited_from = popped_tile
-            queue.append(unvisited.coord)
+        if popped_tile.path_length < max_length:
+            for unvisited in get_unvisited_neighs(popped_tile):
+                unvisited.visited_from = popped_tile
+                unvisited.path_length = popped_tile.path_length + 1
+                add_count += 1
+                if add_count == 500:
+                    assert(false)
+                queue.append(unvisited.coord)
     return null
 
-func free_passable():
+func shortest_path_without_coord(c0, c1, c_block):
+    var block_tile = tiles[c_block.y][c_block.x]
+    assert(block_tile.passable)
+    block_tile.passable = false
+    var new_shortest = shortest_path(c0, c1)
+    block_tile.passable = true
+    return new_shortest
+
+func unblockable_paths(block_coord):
+    # Returns the current shortest paths for which there would not be an
+    # alternative when coord would be blocked
+    var must_paths = []
+    for guy in $Guys.get_children():
+        if not guy.love_found:
+            var alternative_path = shortest_path_without_coord(guy.coord, guy.date.coord, block_coord)
+            if alternative_path == null:
+                var current_path = shortest_path(guy.coord, guy.date.coord)
+                must_paths.append(current_path)
+    return must_paths
+
+func random_passable():
     var coord = passable_coords[randi() % len(passable_coords)]
     var safety = 100
     while coord in date_coords or coord in spawn_coords:
         coord = passable_coords[randi() % len(passable_coords)]
-        print(coord)
         safety -= 1
         if safety == 0:
             return null
@@ -206,17 +263,21 @@ func add_guys(n_guys):
     for guy_idx in n_guys:
         var date_coord
         var spawn_coord
-        for try_different in range(4):
-            date_coord = free_passable()
-            spawn_coord = free_passable()
+        for _try_different in range(4):
+            date_coord = random_passable()
+            spawn_coord = random_passable()
             if date_coord != null and spawn_coord != null and (date_coord != spawn_coord):
                 break 
         date_coords.append(date_coord)
         spawn_coords.append(spawn_coord)
-        var date = HeartScene.instance().init(date_coord)
-        $Stuff.add_child(date)
-        var guy = GuyScene.instance().init(spawn_coord, self, date)
+        # init adds date to tile
+        var date = HeartScene.instance().init(date_coord, self)
+        date.set_guy_type(G.guy_types[guy_idx])
+        $Dates.add_child(date)
+        # init adds guy to tile
+        var guy = GuyScene.instance().init(spawn_coord, self, date, G.guy_types[guy_idx])
         $Guys.add_child(guy)
+
 
 func end_turn():
     turn_processed = false
@@ -239,12 +300,17 @@ func passable_under_mouse():
 func set_mode(new_mode):
     icecream_preview.visible = false
     roadblock_preview.visible = false
+    if new_mode == "icecream":
+        icecream_preview.visible = true
+    elif new_mode == "roadblock":
+        roadblock_preview.visible = true
+    click_mode = new_mode
 
 func _ready():
     icecream_preview = $Preview/Icecream
     roadblock_preview = $Preview/Roadblock
 
-func _process(delta):
+func _process(_delta):
     if not turn_processed:
         turn_processed = true
         var guys = $Guys.get_children()
@@ -259,20 +325,27 @@ func _process(delta):
                     turn_processed = false
                     break
         if turn_processed:
+            for icecream in $Icecreams.get_children():
+                var icecream_tile = tile_at_coord(icecream.coord)
+                if len(icecream_tile.guys) > 0:
+                    icecream_tile.icecream = null
+                    icecream.queue_free()
+            for guy in $Guys.get_children():
+                guy.update_path()
+                guy.show_path_preview()
             emit_signal("city_turn_processed")
     
     var hovered_tile = passable_under_mouse()
-    if hovered_tile != null:
-        if click_mode == "icecream":
-            icecream_preview.position = hovered_tile.position
-            icecream_preview.visible = true
-        else:
-            icecream_preview.visible = false
-        if click_mode == "roadblock":
-            roadblock_preview.position = hovered_tile.position
-            roadblock_preview.visible = true
-        else:
-            roadblock_preview.visible = false
+    if click_mode == "icecream" and hovered_tile != null:
+        icecream_preview.position = hovered_tile.position
+        icecream_preview.visible = true
+    else:
+        icecream_preview.visible = false
+    if click_mode == "roadblock" and hovered_tile != null:
+        roadblock_preview.position = hovered_tile.position
+        roadblock_preview.visible = true
+    else:
+        roadblock_preview.visible = false
         
 #    generate_timeout -= delta
 #    if generate_timeout < 0:
@@ -287,12 +360,16 @@ func _input(event):
             if click_mode == "icecream":
                 if hovered_tile.can_icecream():
                     var new_icecream = IcecreamScene.instance()
-                    new_icecream.position = hovered_tile.position
-                    $Stuff.add_child(new_icecream)
-                    hovered_tile.icecream = new_icecream
+                    new_icecream.set_coord(hovered_tile.coord)
+                    $Icecreams.add_child(new_icecream)
+                    hovered_tile.set_icecream(new_icecream)
             elif click_mode == "roadblock":
                 if hovered_tile.can_roadblock():
-                    var new_roadblock = RoadblockScene.instance()
-                    new_roadblock.position = hovered_tile.position
-                    $Stuff.add_child(new_roadblock)
-                    hovered_tile.roadblock = new_roadblock
+                    var prevent_paths = unblockable_paths(hovered_tile.coord)
+                    if len(prevent_paths) > 0:
+                        return
+                    else:
+                        var new_roadblock = RoadblockScene.instance()
+                        new_roadblock.set_coord(hovered_tile.coord)
+                        $Roadblocks.add_child(new_roadblock)
+                        hovered_tile.set_roadblock(new_roadblock)
