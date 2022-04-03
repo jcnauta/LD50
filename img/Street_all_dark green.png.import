@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/house_freestanding_no_background.png-0f299622c2279ec61d5fb27fb8d10a22.stex"
+path="res://.import/Street_all_dark green.png-f1f9839d5d71dca1fef40fb757e5c394.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://img/houses/house_freestanding_no_background.png"
-dest_files=[ "res://.import/house_freestanding_no_background.png-0f299622c2279ec61d5fb27fb8d10a22.stex" ]
+source_file="res://img/Street_all_dark green.png"
+dest_files=[ "res://.import/Street_all_dark green.png-f1f9839d5d71dca1fef40fb757e5c394.stex" ]
 
 [params]
 

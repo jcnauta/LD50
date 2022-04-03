@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://fonts/Mukta/Mukta-Regular.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://img/Background_ice_cream.png" type="Texture" id=2]
 [ext_resource path="res://img/roadblock.png" type="Texture" id=3]
+[ext_resource path="res://src/BtnRoadblock.gd" type="Script" id=4]
 
 [sub_resource type="DynamicFont" id=2]
 size = 28
@@ -13,6 +14,7 @@ margin_right = 160.0
 margin_bottom = 80.0
 texture_normal = ExtResource( 2 )
 stretch_mode = 5
+script = ExtResource( 4 )
 
 [node name="TextureButton" type="HBoxContainer" parent="."]
 margin_left = 10.0
@@ -57,7 +59,7 @@ margin_bottom = 60.0
 mouse_filter = 1
 custom_constants/margin_top = 8
 
-[node name="RichTextLabel2" type="RichTextLabel" parent="TextureButton/MarginContainer2"]
+[node name="Charges" type="RichTextLabel" parent="TextureButton/MarginContainer2"]
 margin_top = 8.0
 margin_right = 40.0
 margin_bottom = 60.0

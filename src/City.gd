@@ -2,6 +2,7 @@ extends Node2D
 
 signal city_turn_processed
 signal lose_level
+signal powerup_change
 
 var TileScene = preload("res://src/Tile.tscn")
 var GuyScene = preload("res://src/Guy.tscn")
@@ -10,7 +11,7 @@ var IcecreamScene = preload("res://src/Icecream.tscn")
 var RoadblockScene = preload("res://src/Roadblock.tscn")
 
 const street_len_min = 6
-const street_len_max = 12
+const street_len_max = 16
 const choice_zero = 10
 const generate_timeout_max = 0.2
 
@@ -114,7 +115,9 @@ func generate_street():
 
 func add_street_segment(segment):
     for coord in segment:
-        tile_at_coord(coord).set_passable(true)
+        var tile = tile_at_coord(coord)
+        tile.set_type("road")
+        tile.set_passable(true)
         passable_coords.append(coord)
 
 func generate_streets(n_tries):
@@ -134,6 +137,42 @@ func reset_city():
     turn_processed = true
     level_lost = false
 
+func generate_water():
+    var house_tiles = []
+    for row in tiles:
+        for tile in row:
+            if tile.tt == "house":
+                house_tiles.append(tile)
+    var water_goal = floor(G.water_fraction * len(house_tiles))
+    var water_tiles = []
+    var fresh_water = []
+    while len(water_tiles) < water_goal:
+        var new_water = null
+        var house_tile_idx = null
+        if len(fresh_water) > 0 and randf() < 0.9:
+            # Try to create new water from water pool
+            var fresh_water_idx = randi() % len(fresh_water)
+            for d in G.dirs4:
+                var maybe_house = tile_at_coord(add_coords(fresh_water[fresh_water_idx].coord, d))
+                if maybe_house.tt == "house":
+                    new_water = maybe_house
+                    house_tile_idx = house_tiles.find(maybe_house)
+                    assert(house_tile_idx != -1)
+                    break
+            if new_water == null:
+                fresh_water.remove(fresh_water_idx) # had no house neighbors
+        else:
+            # Turn random house into water
+            house_tile_idx = randi() % len(house_tiles)
+            new_water = house_tiles[house_tile_idx]
+        if house_tile_idx != null:
+            house_tiles.remove(house_tile_idx)
+            new_water.set_type("water")
+            water_tiles.append(new_water)
+            fresh_water.append(new_water)
+        else:
+            assert(new_water == null)
+
 func generate_city(level_nr):
     reset_city()
     seed(G.levels[level_nr - 1].seed)
@@ -141,9 +180,11 @@ func generate_city(level_nr):
         var new_row = []
         for col in range(G.grid_dim):
             var new_tile = TileScene.instance().init(Vector2(col, row))
+            new_tile.set_type("house")
             new_row.append(new_tile)
         tiles.append(new_row)
     generate_streets(G.levels[level_nr - 1].streets)
+    generate_water()
     # Actually add tiles
     for row in tiles:
         for tile in row:
@@ -363,6 +404,13 @@ func _input(event):
                     new_icecream.set_coord(hovered_tile.coord)
                     $Icecreams.add_child(new_icecream)
                     hovered_tile.set_icecream(new_icecream)
+                    for guy in $Guys.get_children():
+                        guy.update_path()
+                        guy.show_path_preview()
+                    G.icecreams -= 1
+                    if G.icecreams == 0:
+                        click_mode = null
+                    emit_signal("powerup_change")
             elif click_mode == "roadblock":
                 if hovered_tile.can_roadblock():
                     var prevent_paths = unblockable_paths(hovered_tile.coord)
@@ -373,3 +421,10 @@ func _input(event):
                         new_roadblock.set_coord(hovered_tile.coord)
                         $Roadblocks.add_child(new_roadblock)
                         hovered_tile.set_roadblock(new_roadblock)
+                        for guy in $Guys.get_children():
+                            guy.update_path()
+                            guy.show_path_preview()
+                        G.roadblocks -= 1
+                        if G.roadblocks == 0:
+                            click_mode = null
+                        emit_signal("powerup_change")

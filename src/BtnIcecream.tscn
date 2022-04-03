@@ -1,18 +1,20 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://fonts/Mukta/Mukta-Regular.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://img/Background_ice_cream.png" type="Texture" id=2]
 [ext_resource path="res://img/icecream.png" type="Texture" id=3]
+[ext_resource path="res://src/BtnIcecream.gd" type="Script" id=4]
 
 [sub_resource type="DynamicFont" id=2]
 size = 28
 font_data = ExtResource( 1 )
 
-[node name="IcecreamBtn2" type="TextureButton"]
+[node name="IcecreamBtn" type="TextureButton"]
 margin_right = 160.0
 margin_bottom = 80.0
 texture_normal = ExtResource( 2 )
 stretch_mode = 5
+script = ExtResource( 4 )
 
 [node name="TextureButton" type="HBoxContainer" parent="."]
 margin_left = 10.0
@@ -43,7 +45,7 @@ texture = ExtResource( 3 )
 expand = true
 stretch_mode = 6
 
-[node name="RichTextLabel2" type="RichTextLabel" parent="TextureButton"]
+[node name="Charges" type="RichTextLabel" parent="TextureButton"]
 margin_left = 118.0
 margin_right = 158.0
 margin_bottom = 60.0

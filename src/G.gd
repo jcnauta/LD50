@@ -1,5 +1,8 @@
 extends Node
 
+var roadblocks
+var icecreams
+
 const grid_dim = 25
 const tile_dim = 36
 
@@ -12,17 +15,13 @@ const guy_colors = {
     "penguin": Color.darkblue
    }
 
-const gpo = 6
-const guy_path_offset = {
-    "lion": Vector2(gpo, gpo),
-    "frog": Vector2(gpo, -gpo),
-    "robot": Vector2(-gpo, -gpo),
-    "penguin": Vector2(-gpo, gpo),
-   }
+const money_per_turn = 10
+const money_per_guy = 5
+const water_fraction = 0.3
 
-var levels = [
-    {"seed": 1, "streets": 70, "guys": 4}, # 1
-    {"seed": 2, "streets": 40, "guys": 2},
+const levels = [
+    {"seed": 1, "streets": 40, "guys": 4, "roadblocks": 1, "icecreams": 2}, # 1
+    {"seed": 2, "streets": 40, "guys": 2, "roadblocks": 1, "icecreams": 1},
 #    {"seed": 3, "streets": 100, "guys": 2},
 #    {"seed": 4, "streets": 70, "guys": 3},
 #    {"seed": 5, "streets": 70, "guys": 3}, # 5

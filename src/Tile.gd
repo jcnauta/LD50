@@ -1,8 +1,10 @@
 extends Node2D
 
 
-const house_img = preload("res://img/house_pale.png")
-const road_img = preload("res://img/Street_really_all_for_now.png")
+const house_img = preload("res://img/City_tiles_4_house_types.png")
+const house_img_pale = preload("res://img/City_tiles_4_house_types_pale.png")
+const water_img = preload("res://img/River_all.png")
+const road_img = preload("res://img/Street_all_dark green.png")
 
 var passable = false
 var placeable = false
@@ -10,6 +12,7 @@ var coord
 var visited_from = null  # For depth-first search
 var path_length = null  # For ice cream search
 var city
+var tt
 
 # Stuff (may be mutually exclusive) on this tile
 var icecream = null
@@ -20,15 +23,22 @@ var guys = []
 func init(init_coord):
     self.coord = init_coord
     self.position = init_coord * G.tile_dim
-#    $Sprite.modulate = Color.red
     return self
 
 func _ready():
     city = get_node("/root/Game/City")
     
     house_img.flags = 3
-    $SpriteHouse.texture = house_img
+    house_img_pale.flags = 3
+#    if randf() < 0.5:
+#        $SpriteHouse.texture = house_img
+#    else:
+    $SpriteHouse.texture = house_img_pale
     $SpriteHouse.visible = true
+    
+    water_img.flags = 3
+    $SpriteWater.texture = water_img
+    $SpriteWater.visible = true
     
     road_img.flags = 3
     $SpriteRoad.texture = road_img
@@ -67,48 +77,128 @@ func clear_date(old_date):
     assert(date == old_date)
     date = null
 
+func set_type(new_tt):
+    tt = new_tt
+
 func update_sprite():
-    if passable:
+    var l = Vector2(-1, 0)
+    var u = Vector2(0, -1)
+    var r = Vector2(1, 0)
+    var d = Vector2(0, 1)
+    var neighs = {}
+    for dir in G.dirs4:
+        neighs[dir] = city.tile_at_coord(city.add_coords(coord, dir))
+    if tt == "road":
         $SpriteHouse.visible = false
+        $SpriteWater.visible = false
         $SpriteRoad.visible = true
         $SpriteRoad.texture = road_img
-        $SpriteRoad.modulate = Color.white
-        var neighs = {}
-        for dir in G.dirs4:
-            neighs[dir] = city.tile_at_coord(city.add_coords(coord, dir))
-        var l = Vector2(-1, 0)
-        var u = Vector2(0, -1)
-        var r = Vector2(1, 0)
-        var d = Vector2(0, 1)
-        if neighs[l].passable and neighs[u].passable and neighs[r].passable and neighs[d].passable:
+        if neighs[l].tt == "road" and neighs[u].tt == "road" and \
+                neighs[r].tt == "road" and neighs[d].tt == "road":
             $SpriteRoad.frame = 11
-        elif neighs[l].passable and neighs[u].passable and neighs[r].passable:
+        elif neighs[l].tt == "road" and neighs[u].tt == "road" and neighs[r].tt == "road":
             $SpriteRoad.frame = 13
-        elif neighs[l].passable and neighs[d].passable and neighs[r].passable:
+        elif neighs[l].tt == "road" and neighs[d].tt == "road" and neighs[r].tt == "road":
             $SpriteRoad.frame = 12
-        elif neighs[l].passable and neighs[u].passable and neighs[d].passable:
+        elif neighs[l].tt == "road" and neighs[u].tt == "road" and neighs[d].tt == "road":
             $SpriteRoad.frame = 15
-        elif neighs[d].passable and neighs[u].passable and neighs[r].passable:
+        elif neighs[d].tt == "road" and neighs[u].tt == "road" and neighs[r].tt == "road":
             $SpriteRoad.frame = 14
-        elif neighs[l].passable and neighs[u].passable:
+        elif neighs[l].tt == "road" and neighs[u].tt == "road":
             $SpriteRoad.frame = 0
-        elif neighs[r].passable and neighs[u].passable:
+        elif neighs[r].tt == "road" and neighs[u].tt == "road":
             $SpriteRoad.frame = 1
-        elif neighs[l].passable and neighs[d].passable:
+        elif neighs[l].tt == "road" and neighs[d].tt == "road":
             $SpriteRoad.frame = 2
-        elif neighs[r].passable and neighs[d].passable:
+        elif neighs[r].tt == "road" and neighs[d].tt == "road":
             $SpriteRoad.frame = 3
-        elif neighs[u].passable and neighs[d].passable:
+        elif neighs[u].tt == "road" and neighs[d].tt == "road":
             $SpriteRoad.frame = 5
-        elif neighs[l].passable and neighs[r].passable:
+        elif neighs[l].tt == "road" and neighs[r].tt == "road":
             $SpriteRoad.frame = 4
-        elif neighs[l].passable:
+        elif neighs[l].tt == "road":
             $SpriteRoad.frame = 9
-        elif neighs[u].passable:
+        elif neighs[u].tt == "road":
             $SpriteRoad.frame = 6
-        elif neighs[r].passable:
+        elif neighs[r].tt == "road":
             $SpriteRoad.frame = 7
-        elif neighs[d].passable:
+        elif neighs[d].tt == "road":
             $SpriteRoad.frame = 8
         else:
             $SpriteRoad.frame = 10
+    elif tt == "house":
+        $SpriteHouse.visible = true
+        $SpriteWater.visible = false
+        $SpriteRoad.visible = false
+        if neighs[l].tt == "house" and neighs[u].tt == "house" and \
+                neighs[r].tt == "house" and neighs[d].tt == "house":
+            $SpriteHouse.frame = 11
+        elif neighs[l].tt == "house" and neighs[u].tt == "house" and neighs[r].tt == "house":
+            $SpriteHouse.frame = 13
+        elif neighs[l].tt == "house" and neighs[d].tt == "house" and neighs[r].tt == "house":
+            $SpriteHouse.frame = 12
+        elif neighs[l].tt == "house" and neighs[u].tt == "house" and neighs[d].tt == "house":
+            $SpriteHouse.frame = 15
+        elif neighs[d].tt == "house" and neighs[u].tt == "house" and neighs[r].tt == "house":
+            $SpriteHouse.frame = 14
+        elif neighs[l].tt == "house" and neighs[u].tt == "house":
+            $SpriteHouse.frame = 0
+        elif neighs[r].tt == "house" and neighs[u].tt == "house":
+            $SpriteHouse.frame = 1
+        elif neighs[l].tt == "house" and neighs[d].tt == "house":
+            $SpriteHouse.frame = 2
+        elif neighs[r].tt == "house" and neighs[d].tt == "house":
+            $SpriteHouse.frame = 3
+        elif neighs[u].tt == "house" and neighs[d].tt == "house":
+            $SpriteHouse.frame = 5
+        elif neighs[l].tt == "house" and neighs[r].tt == "house":
+            $SpriteHouse.frame = 4
+        elif neighs[l].tt == "house":
+            $SpriteHouse.frame = 9
+        elif neighs[u].tt == "house":
+            $SpriteHouse.frame = 6
+        elif neighs[r].tt == "house":
+            $SpriteHouse.frame = 7
+        elif neighs[d].tt == "house":
+            $SpriteHouse.frame = 8
+        else:
+            $SpriteHouse.frame = 10
+    elif tt == "water":
+        $SpriteHouse.visible = false
+        $SpriteWater.visible = true
+        $SpriteRoad.visible = false
+        if neighs[l].tt == "water" and neighs[u].tt == "water" and \
+                neighs[r].tt == "water" and neighs[d].tt == "water":
+            $SpriteWater.frame = 11
+        elif neighs[l].tt == "water" and neighs[u].tt == "water" and neighs[r].tt == "water":
+            $SpriteWater.frame = 13
+        elif neighs[l].tt == "water" and neighs[d].tt == "water" and neighs[r].tt == "water":
+            $SpriteWater.frame = 12
+        elif neighs[l].tt == "water" and neighs[u].tt == "water" and neighs[d].tt == "water":
+            $SpriteWater.frame = 15
+        elif neighs[d].tt == "water" and neighs[u].tt == "water" and neighs[r].tt == "water":
+            $SpriteWater.frame = 14
+        elif neighs[l].tt == "water" and neighs[u].tt == "water":
+            $SpriteWater.frame = 0
+        elif neighs[r].tt == "water" and neighs[u].tt == "water":
+            $SpriteWater.frame = 1
+        elif neighs[l].tt == "water" and neighs[d].tt == "water":
+            $SpriteWater.frame = 2
+        elif neighs[r].tt == "water" and neighs[d].tt == "water":
+            $SpriteWater.frame = 3
+        elif neighs[u].tt == "water" and neighs[d].tt == "water":
+            $SpriteWater.frame = 5
+        elif neighs[l].tt == "water" and neighs[r].tt == "water":
+            $SpriteWater.frame = 4
+        elif neighs[l].tt == "water":
+            $SpriteWater.frame = 9
+        elif neighs[u].tt == "water":
+            $SpriteWater.frame = 6
+        elif neighs[r].tt == "water":
+            $SpriteWater.frame = 7
+        elif neighs[d].tt == "water":
+            $SpriteWater.frame = 8
+        else:
+            $SpriteWater.frame = 10
+    else:
+        assert(false)

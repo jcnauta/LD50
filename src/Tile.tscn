@@ -17,3 +17,11 @@ region_rect = Rect2( 0, 0, 18, 18 )
 [node name="SpriteHouse" type="Sprite" parent="."]
 scale = Vector2( 2, 2 )
 centered = false
+hframes = 16
+frame = 5
+
+[node name="SpriteWater" type="Sprite" parent="."]
+scale = Vector2( 2, 2 )
+centered = false
+hframes = 16
+frame = 5

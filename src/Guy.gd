@@ -3,7 +3,8 @@ extends Node2D
 var coord = null
 var dest_coord = null
 var move_coord = null
-var tile_speed = 10
+var tile_speed = 2
+var tile_speed_increase = 2
 var animate_speed = 20
 var pixel_speed = animate_speed * G.tile_dim
 var timeout = 0.05
@@ -17,6 +18,16 @@ var turn_processed = false
 var date = null
 var love_found = false
 var guy_type
+
+const gpo = 4
+const path_offset = {
+    "lion": Vector2(gpo, gpo),
+    "frog": Vector2(gpo, -gpo),
+    "robot": Vector2(-gpo, -gpo),
+    "penguin": Vector2(-gpo, gpo),
+   }
+const small_dot = 10
+const big_dot = 20
 
 func _ready():
     $PathPreview.set_as_toplevel(true)
@@ -105,14 +116,24 @@ func update_path():
 func show_path_preview():
     for c in $PathPreview.get_children():
         c.queue_free()
+    var simulated_speed = tile_speed
+    var simulated_steps = 0
     for c in full_path:
         var path_dot = ColorRect.new()
-        path_dot.rect_size = Vector2(10, 10)
+        if simulated_steps == simulated_speed:
+            path_dot.rect_size = big_dot * Vector2(1, 1)
+            path_dot.rect_position = c * G.tile_dim + Vector2(13, 13) + path_offset[guy_type]
+            path_dot.rect_position -= 0.5 * (big_dot - small_dot) * Vector2(1, 1)
+            simulated_steps = 0
+            simulated_speed += tile_speed_increase
+            path_dot.modulate = Color(1, 1, 1, 0.7)
+        else:
+            path_dot.rect_size = small_dot * Vector2(1, 1)
+            path_dot.rect_position = c * G.tile_dim + Vector2(13, 13) + path_offset[guy_type]
+            path_dot.modulate = Color(1, 1, 1, 0.5)
+        simulated_steps += 1
         path_dot.color = G.guy_colors[guy_type]
-        path_dot.modulate = Color(1, 1, 1, 0.5)
-        path_dot.rect_position = c * G.tile_dim + Vector2(13, 13) + G.guy_path_offset[guy_type]
         $PathPreview.add_child(path_dot)
-        print("added child")
 
 func shift_walk():
     if walk_next_idx >= len(move_path) - 1:
@@ -132,7 +153,7 @@ func do_turn():
     turn_processed = false
     update_path()
     animate_to_move_coord = true
-    tile_speed += 1
+    tile_speed += tile_speed_increase
     animate_speed += 1.5
 
 func _process(delta):
