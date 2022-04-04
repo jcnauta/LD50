@@ -290,7 +290,7 @@ func generate_city(level_nr):
             $Tiles.add_child(tile)
             tile.update_sprite()
     connect("city_turn_processed", get_node("/root/Game"), "city_turn_processed")
-    add_guys(G.levels[level_nr - 1].guys)
+    add_guys(G.level_info.guys)
     
 
 func get_unvisited_neighs(tile):
@@ -433,9 +433,8 @@ func add_balloons():
 func pickup_balloon(balloon_tile):
     G.money += G.money_per_balloon
     balloon_coords.erase(balloon_tile.coord)
-    var to_remove = balloon_tile.balloon
-    $Balloons.remove_child(to_remove)
-    to_remove.queue_free()
+    var balloon = balloon_tile.balloon
+    balloon.collect()
     balloon_tile.balloon = null
 
 func path_preview_updated(guy_type, turns):

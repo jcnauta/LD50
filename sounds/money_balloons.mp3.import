@@ -11,5 +11,5 @@ dest_files=[ "res://.import/money_balloons.mp3-083ef38ee32286b6bf566d5935382bb1.
 
 [params]
 
-loop=true
+loop=false
 loop_offset=0

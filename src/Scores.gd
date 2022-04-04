@@ -21,7 +21,7 @@ func show_scores():
         8: 8,
         9: 14
        }
-    if get_tree().paused:
+    if G.just_paused:
         $CloseBtn.show()
     else:
         $CloseBtn.hide()

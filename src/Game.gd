@@ -13,11 +13,11 @@ func _ready():
 
 func toggle_menu():
     if G.showing_menu:
-        if get_tree().paused:
-            $UI.hide_scores()
-            get_tree().paused = false
+        $UI.hide_scores()
+        get_tree().paused = false
     else:  # not showing menu, we are in-game - pause
         get_tree().paused = true
+        G.just_paused = true
         $UI.show_scores()
 
 func end_turn():
@@ -42,6 +42,7 @@ func add_money(amount):
 func lost_level():
     if not G.money_per_level.has(G.level_nr) or G.money > G.money_per_level[G.level_nr]:
         G.money_per_level[G.level_nr] = G.money
+    get_tree().paused = true
     $UI.show_scores()
 
 func restart_level():
@@ -54,11 +55,11 @@ func powerup_change():
 func play_level(level_to_play):
     G.level_nr = level_to_play
     G.money = 0
-    G.generate_level_info(G.level_nr - 1)
-    var level_info = G.levels[G.level_nr - 1]
+    G.generate_level_info(G.levels[G.level_nr - 1])
+    var level_info = G.level_info
     G.roadblocks = level_info.roadblocks
     G.icecreams = level_info.icecreams
-    G.paused = false
+    G.just_paused = false
     $UI.reset()
     $UI.hide_scores()
     $City.generate_city(G.level_nr)
