@@ -11,5 +11,5 @@ dest_files=[ "res://.import/place_blockade_single_sound.mp3-dbed541d00a2cff0b910
 
 [params]
 
-loop=true
+loop=false
 loop_offset=0

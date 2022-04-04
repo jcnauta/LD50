@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/money_bag_more_pxls.png-afe16e5ac7095e7c9bc13ba71b8c2de1.stex"
+path="res://.import/balloons_spritesheet.png-74dddbb35cd001a5a0dcceb751a570b9.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://img/money_bag_more_pxls.png"
-dest_files=[ "res://.import/money_bag_more_pxls.png-afe16e5ac7095e7c9bc13ba71b8c2de1.stex" ]
+source_file="res://img/balloons_spritesheet.png"
+dest_files=[ "res://.import/balloons_spritesheet.png-74dddbb35cd001a5a0dcceb751a570b9.stex" ]
 
 [params]
 
@@ -20,7 +20,7 @@ compress/hdr_mode=0
 compress/bptc_ldr=0
 compress/normal_map=0
 flags/repeat=0
-flags/filter=true
+flags/filter=false
 flags/mipmaps=false
 flags/anisotropic=false
 flags/srgb=2

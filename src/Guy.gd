@@ -1,5 +1,8 @@
 extends Node2D
 
+signal pickup_balloon
+signal path_preview_updated
+
 var coord = null
 var dest_coord = null
 var move_coord = null
@@ -18,6 +21,7 @@ var turn_processed = false
 var date = null
 var love_found = false
 var guy_type
+var sprite
 
 const gpo = 4
 const path_offset = {
@@ -28,6 +32,13 @@ const path_offset = {
    }
 const small_dot = 10
 const big_dot = 20
+
+const love_sounds = {
+    "lion": preload("res://sounds/find_love_loewi.mp3"),
+    "frog": preload("res://sounds/find_love_frog.mp3"),
+    "robot": preload("res://sounds/find_love_robot_bzzz.mp3"),
+    "penguin": preload("res://sounds/find_love_pingu.mp3"),
+   }
 
 func _ready():
     $PathPreview.set_as_toplevel(true)
@@ -56,9 +67,11 @@ func found_love():
     if love_found:
         return
     love_found = true
+    emit_signal("path_preview_updated", self.guy_type, 0)
+    $Sounds/FindLove.play()
     date.found_love()
-    $Tween.interpolate_property($Sprite, "modulate",
-        Color(1, 1, 1, 1), Color(1, 1, 1, 0), 0.1,
+    $Tween.interpolate_property(sprite, "modulate",
+        Color(1, 1, 1, 1), Color(1, 1, 1, 0), 1.5,
         Tween.TRANS_LINEAR, Tween.EASE_IN)
     $Tween.connect("tween_all_completed", self, "queue_free")
     $Tween.start()
@@ -73,16 +86,21 @@ func set_date(new_date):
 
 func set_guy_type(new_type):
     guy_type = new_type
+    $Sounds/FindLove.stream = love_sounds[new_type]
     for spr in $Sprites.get_children():
         spr.visible = false
     if guy_type == "lion":
-        $Sprites/Lion.visible = true
+        sprite = $Sprites/Lion
+        sprite.visible = true
     if guy_type == "frog":
-        $Sprites/Frog.visible = true
+        sprite = $Sprites/Frog
+        sprite.visible = true
     if guy_type == "robot":
-        $Sprites/Robot.visible = true
+        sprite = $Sprites/Robot
+        sprite.visible = true
     if guy_type == "penguin":
-        $Sprites/Penguin.visible = true
+        sprite = $Sprites/Penguin
+        sprite.visible = true
 
 func update_path():
     full_path = []
@@ -100,9 +118,6 @@ func update_path():
             var path_from_icecream = city.shortest_path(full_path.back(), dest_coord)
             if path_from_icecream != null:
                 full_path.append_array(path_from_icecream.slice(1, len(path_from_icecream)))
-        for p in full_path:
-            var tile = city.tile_at_coord(p)
-#            tile.modulate = Color.green
         if len(full_path) > 1:
             move_path = full_path.slice(0, min(tile_speed, len(full_path) - 1))
             walk_prev_idx = 0
@@ -116,13 +131,17 @@ func update_path():
         turn_processed = true
 
 func show_path_preview():
+    var turns_left = 1
     for c in $PathPreview.get_children():
         c.queue_free()
     var simulated_speed = tile_speed
     var simulated_steps = 0
     for c in full_path:
+        var tile = city.tile_at_coord(c)
         var path_dot = ColorRect.new()
-        if simulated_steps == simulated_speed:
+        if simulated_steps == simulated_speed or tile.icecream != null:
+            if c != full_path[-1]:
+                turns_left += 1
             path_dot.rect_size = big_dot * Vector2(1, 1)
             path_dot.rect_position = c * G.tile_dim + Vector2(13, 13) + path_offset[guy_type]
             path_dot.rect_position -= 0.5 * (big_dot - small_dot) * Vector2(1, 1)
@@ -136,8 +155,14 @@ func show_path_preview():
         simulated_steps += 1
         path_dot.color = G.guy_colors[guy_type]
         $PathPreview.add_child(path_dot)
-
+    emit_signal("path_preview_updated", self.guy_type, turns_left)
+    
 func shift_walk():
+    # Pick up balloon
+    var coord_here = move_path[walk_next_idx]
+    var tile_here = city.tile_at_coord(coord_here)
+    if tile_here.balloon != null:
+        emit_signal("pickup_balloon", tile_here)
     if walk_next_idx >= len(move_path) - 1:
         # We reached the move destination
         set_coord(move_path[len(move_path) - 1])

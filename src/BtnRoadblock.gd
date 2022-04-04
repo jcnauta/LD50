@@ -1,7 +1,7 @@
 extends TextureButton
 
 func update():
-    $TextureButton/MarginContainer2/Charges.bbcode_text = "x" + str(G.roadblocks)
+    $TextureButton/Charges.bbcode_text = "x" + str(G.roadblocks)
     if G.roadblocks == 0:
         self.disabled = true
         self.modulate = Color(0.5, 0.5, 0.8, 0.8)

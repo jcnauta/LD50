@@ -9,6 +9,7 @@ var GuyScene = preload("res://src/Guy.tscn")
 var HeartScene = preload("res://src/Heart.tscn")
 var IcecreamScene = preload("res://src/Icecream.tscn")
 var RoadblockScene = preload("res://src/Roadblock.tscn")
+var BalloonScene = preload("res://src/Balloon.tscn")
 
 const choice_zero = 10
 const generate_timeout_max = 0.2
@@ -17,11 +18,14 @@ var tiles = []
 var passable_coords = []
 var date_coords = []
 var spawn_coords = []
+var balloon_coords = []
 var generate_timeout = generate_timeout_max
 var turn_processed = true
 var level_lost = false
 var icecream_preview
 var roadblock_preview
+
+var prognoses = {}
 
 func pos_to_float_coord(pos):
     return pos / G.tile_dim
@@ -154,7 +158,7 @@ func add_street_segment(segment):
         tile.set_passable(true)
         passable_coords.append(coord)
 
-func generate_street_core(street_frac):
+func generate_street_core():
     # Create some streets to start with, before generating with the other method
     var start_coord = random_non_edge_coord()
     var core_complete = false
@@ -196,8 +200,8 @@ func generate_street_core(street_frac):
 func street_fraction():
     return float(len(passable_coords)) / G.total_tiles
 
-func generate_streets(street_frac):
-    generate_street_core(street_frac)
+func generate_streets():
+    generate_street_core()
     print("After core generation, " + str(len(passable_coords)) + " street tiles (fraction " + \
             str(street_fraction()) + "/" + str(G.street_core_frac) + ")")
     var gen_fails = 0
@@ -216,7 +220,7 @@ func generate_streets(street_frac):
             " (fraction " + str(street_fraction()) + "/" + str(G.level_info.street_fraction) + ")")
 
 func reset_city():
-    var child_containers = [$Tiles, $Icecreams, $Roadblocks, $Guys]
+    var child_containers = [$Tiles, $Icecreams, $Roadblocks, $Guys, $Dates, $Balloons]
     for child_container in child_containers:
         for child in child_container.get_children():
            child.queue_free()
@@ -224,6 +228,8 @@ func reset_city():
     passable_coords = []
     date_coords = []
     spawn_coords = []
+    balloon_coords = []
+    prognoses = {}
     generate_timeout = generate_timeout_max
     turn_processed = true
     level_lost = false
@@ -274,8 +280,9 @@ func generate_city(level_nr):
             new_tile.set_type("house")
             new_row.append(new_tile)
         tiles.append(new_row)
-    generate_streets(G.levels[level_nr - 1].street_fraction)
+    generate_streets()
     generate_water()
+    add_balloons()
     # Actually add tiles
     for row in tiles:
         for tile in row:
@@ -384,7 +391,7 @@ func unblockable_paths(block_coord):
 func random_passable_without_stuff():
     var coord = random_passable_coord(false)
     var safety = 100
-    while coord in date_coords or coord in spawn_coords:
+    while coord in date_coords or coord in spawn_coords or coord in balloon_coords:
         coord = random_passable_coord(false)
         safety -= 1
         if safety == 0:
@@ -409,9 +416,31 @@ func add_guys(n_guys):
         date.set_guy_type(G.guy_types[guy_idx])
         $Dates.add_child(date)
         # init adds guy to tile
-        var guy = GuyScene.instance().init(spawn_coord, self, date, G.guy_types[guy_idx])
+        var guy = GuyScene.instance()
+        guy.connect("pickup_balloon", self, "pickup_balloon")
+        guy.connect("path_preview_updated", self, "path_preview_updated")
+        guy.init(spawn_coord, self, date, G.guy_types[guy_idx])
         $Guys.add_child(guy)
 
+func add_balloons():
+    for balloon_idx in range(G.level_info.balloons):
+        var balloon_coord = random_passable_without_stuff()
+        assert(balloon_coord != null)
+        balloon_coords.append(balloon_coord)
+        var new_balloon = BalloonScene.instance().init(balloon_coord, self)
+        $Balloons.add_child(new_balloon)
+
+func pickup_balloon(balloon_tile):
+    G.money += G.money_per_balloon
+    balloon_coords.erase(balloon_tile.coord)
+    var to_remove = balloon_tile.balloon
+    $Balloons.remove_child(to_remove)
+    to_remove.queue_free()
+    balloon_tile.balloon = null
+
+func path_preview_updated(guy_type, turns):
+    prognoses[guy_type] = turns
+    get_node("/root/Game/UI").set_prognoses(prognoses)
 
 func end_turn():
     turn_processed = false
@@ -463,7 +492,7 @@ func _process(_delta):
                 var icecream_tile = tile_at_coord(icecream.coord)
                 if len(icecream_tile.guys) > 0:
                     icecream_tile.icecream = null
-                    icecream.queue_free()
+                    icecream.get_eaten()
             for guy in $Guys.get_children():
                 guy.update_path()
                 guy.show_path_preview()
@@ -490,6 +519,7 @@ func _input(event):
                     var new_icecream = IcecreamScene.instance()
                     new_icecream.set_coord(hovered_tile.coord)
                     $Icecreams.add_child(new_icecream)
+                    $Sounds/IcecreamPlaced.play()
                     hovered_tile.set_icecream(new_icecream)
                     for guy in $Guys.get_children():
                         guy.update_path()
@@ -507,6 +537,7 @@ func _input(event):
                         var new_roadblock = RoadblockScene.instance()
                         new_roadblock.set_coord(hovered_tile.coord)
                         $Roadblocks.add_child(new_roadblock)
+                        $Sounds/RoadblockPlaced.play()
                         hovered_tile.set_roadblock(new_roadblock)
                         for guy in $Guys.get_children():
                             guy.update_path()

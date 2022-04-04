@@ -11,5 +11,5 @@ dest_files=[ "res://.import/find_love_pingu.mp3-9d226121ebdf70993155c36dbcf51710
 
 [params]
 
-loop=true
+loop=false
 loop_offset=0

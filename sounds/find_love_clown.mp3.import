@@ -11,5 +11,5 @@ dest_files=[ "res://.import/find_love_clown.mp3-5cb9b1eb1f88d5cd03a6791ac7e20546
 
 [params]
 
-loop=true
+loop=false
 loop_offset=0

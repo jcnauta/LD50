@@ -11,5 +11,5 @@ dest_files=[ "res://.import/find_love_loewi.mp3-3561b3b3a1e462db5ea8213612b65bc4
 
 [params]
 
-loop=true
+loop=false
 loop_offset=0

@@ -11,5 +11,5 @@ dest_files=[ "res://.import/spot_ice_cream_hm.mp3-ce6203ad2ff912e79e840a1ac92f0e
 
 [params]
 
-loop=true
+loop=false
 loop_offset=0

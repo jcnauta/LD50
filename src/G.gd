@@ -1,8 +1,13 @@
 extends Node
 
+var showing_menu = false
+var paused = false
+var level_nr = 1
 var roadblocks
 var icecreams
 var click_mode  # {icecream, roadblock, null}
+var money = 0
+var money_per_level = {}
 
 const grid_dim = 25
 const tile_dim = 36
@@ -17,19 +22,27 @@ const guy_colors = {
     "penguin": Color.darkblue
    }
 
+const guy_imgs = {
+    "lion": preload("res://img/Loewi.png"),
+    "frog": preload("res://img/Frog.png"),
+    "robot": preload("res://img/friendly_robot_purple.png"),
+    "penguin": preload("res://img/Penguin.png"),
+   }
+
 const money_per_turn = 10
 const money_per_guy = 5
+const money_per_balloon = 15
 const water_fraction = 0.3
 const street_core_frac = 0.15
 
 # Set difficulties in [1, 100]
 const levels = [
-    {"seed": 6, "difficulty": 1},
+    {"seed": 6, "difficulty": 1},  # score 150
     {"seed": 2, "difficulty": 100},
     {"seed": 3, "difficulty": 50},
     {"seed": 4, "difficulty": 10},
-    {"seed": 5, "difficulty": 20},
-    {"seed": 7, "difficulty": 50},
+    {"seed": 5, "difficulty": 20},  # score 165
+    {"seed": 7, "difficulty": 50},  # score 170
     {"seed": 8, "difficulty": 60},
     {"seed": 9, "difficulty": 70},
     {"seed": 1, "difficulty": 80},

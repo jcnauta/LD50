@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://src/Prognoses.gd" type="Script" id=2]
+
+[node name="Prognoses" type="VBoxContainer"]
+margin_top = 282.0
+margin_right = 160.0
+margin_bottom = 332.0
+script = ExtResource( 2 )

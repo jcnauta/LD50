@@ -6,6 +6,7 @@ var love_found = false
 var guy_type
 
 func init(new_date, new_city):
+    pause_mode = Node.PAUSE_MODE_PROCESS
     city = new_city
     set_coord(new_date)
     return self

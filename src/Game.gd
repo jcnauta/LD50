@@ -3,16 +3,22 @@ extends Node2D
 var turn_processed = true
 var turn_number = 0
 var turns_per_level = {}
-var money_per_level = {}
-var level_nr = 1
-var money = 0
 
 func _ready():
     $City.connect("lose_level", self, "lost_level")
     $City.connect("powerup_change", self, "powerup_change")
     $UI.connect("powerup_change", self, "powerup_change")
     $UI/Scores.connect("play_level", self, "play_level")
-    play_level(level_nr)
+    play_level(G.level_nr)
+
+func toggle_menu():
+    if G.showing_menu:
+        if get_tree().paused:
+            $UI.hide_scores()
+            get_tree().paused = false
+    else:  # not showing menu, we are in-game - pause
+        get_tree().paused = true
+        $UI.show_scores()
 
 func end_turn():
     # Prevent player from ending the turn before the previous one is over
@@ -30,26 +36,32 @@ func city_turn_processed():
             add_money(G.money_per_guy)
 
 func add_money(amount):
-    money += amount
-    $UI.set_money(money)
+    G.money += amount
+    $UI.set_money(G.money)
 
 func lost_level():
-#    turns_per_level[level_nr] = turn_number
-    money_per_level[level_nr] = money
-    $UI.show_scores(money_per_level, level_nr)
-    money = 0
+    if not G.money_per_level.has(G.level_nr) or G.money > G.money_per_level[G.level_nr]:
+        G.money_per_level[G.level_nr] = G.money
+    $UI.show_scores()
+
+func restart_level():
+    disconnect("city_turn_processed", get_node("/root/Game"), "city_turn_processed")
+    play_level(G.level_nr)
 
 func powerup_change():
     $UI.update_powerups()
 
 func play_level(level_to_play):
-    level_nr = level_to_play
-    G.generate_level_info(level_nr - 1)
-    var level_info = G.levels[level_nr - 1]
+    G.level_nr = level_to_play
+    G.money = 0
+    G.generate_level_info(G.level_nr - 1)
+    var level_info = G.levels[G.level_nr - 1]
     G.roadblocks = level_info.roadblocks
     G.icecreams = level_info.icecreams
+    G.paused = false
     $UI.reset()
-    $City.generate_city(level_nr)
+    $UI.hide_scores()
+    $City.generate_city(G.level_nr)
     turn_processed = true
     turn_number = 0
 

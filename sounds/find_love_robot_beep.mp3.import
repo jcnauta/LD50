@@ -11,5 +11,5 @@ dest_files=[ "res://.import/find_love_robot_beep.mp3-88b59644acbb6a003fbf743260e
 
 [params]
 
-loop=true
+loop=false
 loop_offset=0

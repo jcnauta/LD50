@@ -11,5 +11,5 @@ dest_files=[ "res://.import/eat_ice_cream_long.mp3-0cad8b7134fb5c8e18c2160f53f23
 
 [params]
 
-loop=true
+loop=false
 loop_offset=0

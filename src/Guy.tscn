@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://img/Loewi.png" type="Texture" id=1]
 [ext_resource path="res://src/Guy.gd" type="Script" id=2]
 [ext_resource path="res://img/Frog.png" type="Texture" id=3]
 [ext_resource path="res://img/friendly_robot_purple.png" type="Texture" id=4]
 [ext_resource path="res://img/Penguin.png" type="Texture" id=5]
+[ext_resource path="res://sounds/spot_ice_cream_hm.mp3" type="AudioStream" id=6]
 
 [node name="Guy" type="Node2D"]
 script = ExtResource( 2 )
@@ -35,3 +36,10 @@ texture = ExtResource( 5 )
 centered = false
 
 [node name="Tween" type="Tween" parent="."]
+
+[node name="Sounds" type="Node" parent="."]
+
+[node name="IcecreamEat" type="AudioStreamPlayer" parent="Sounds"]
+stream = ExtResource( 6 )
+
+[node name="FindLove" type="AudioStreamPlayer" parent="Sounds"]

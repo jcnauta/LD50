@@ -19,6 +19,7 @@ var tt
 var icecream = null
 var roadblock = null
 var date = null
+var balloon = null
 var guys = []
 
 func init(init_coord):
@@ -80,6 +81,9 @@ func set_date(new_date):
 func clear_date(old_date):
     assert(date == old_date)
     date = null
+
+func add_balloon(new_balloon):
+    balloon = new_balloon
 
 func set_type(new_tt):
     tt = new_tt

@@ -6,6 +6,22 @@
 [ext_resource path="res://img/Heart_penguin_colors.png" type="Texture" id=4]
 [ext_resource path="res://img/Heart_robot_colors.png" type="Texture" id=5]
 
+[sub_resource type="AtlasTexture" id=8]
+atlas = ExtResource( 5 )
+region = Rect2( 0, 0, 18, 18 )
+
+[sub_resource type="AtlasTexture" id=9]
+atlas = ExtResource( 5 )
+region = Rect2( 18, 0, 18, 18 )
+
+[sub_resource type="AtlasTexture" id=10]
+atlas = ExtResource( 5 )
+region = Rect2( 36, 0, 18, 18 )
+
+[sub_resource type="AtlasTexture" id=11]
+atlas = ExtResource( 5 )
+region = Rect2( 54, 0, 18, 18 )
+
 [sub_resource type="AtlasTexture" id=5]
 atlas = ExtResource( 3 )
 region = Rect2( 0, 0, 18, 18 )
@@ -46,24 +62,13 @@ region = Rect2( 36, 0, 18, 18 )
 atlas = ExtResource( 4 )
 region = Rect2( 54, 0, 18, 18 )
 
-[sub_resource type="AtlasTexture" id=8]
-atlas = ExtResource( 5 )
-region = Rect2( 0, 0, 18, 18 )
-
-[sub_resource type="AtlasTexture" id=9]
-atlas = ExtResource( 5 )
-region = Rect2( 18, 0, 18, 18 )
-
-[sub_resource type="AtlasTexture" id=10]
-atlas = ExtResource( 5 )
-region = Rect2( 36, 0, 18, 18 )
-
-[sub_resource type="AtlasTexture" id=11]
-atlas = ExtResource( 5 )
-region = Rect2( 54, 0, 18, 18 )
-
 [sub_resource type="SpriteFrames" id=1]
 animations = [ {
+"frames": [ SubResource( 8 ), SubResource( 9 ), SubResource( 10 ), SubResource( 11 ) ],
+"loop": true,
+"name": "penguin",
+"speed": 5.0
+}, {
 "frames": [ SubResource( 5 ), SubResource( 6 ), SubResource( 7 ), SubResource( 6 ) ],
 "loop": true,
 "name": "frog",
@@ -78,11 +83,6 @@ animations = [ {
 "loop": true,
 "name": "robot",
 "speed": 5.0
-}, {
-"frames": [ SubResource( 8 ), SubResource( 9 ), SubResource( 10 ), SubResource( 11 ) ],
-"loop": true,
-"name": "penguin",
-"speed": 5.0
 } ]
 
 [node name="Heart" type="Node2D"]
@@ -93,6 +93,7 @@ position = Vector2( -8, -12 )
 scale = Vector2( 3, 3 )
 frames = SubResource( 1 )
 animation = "penguin"
+frame = 2
 playing = true
 centered = false
 

@@ -11,5 +11,5 @@ dest_files=[ "res://.import/find_love_frog.mp3-ec4726cdaaf75db9ade26fa3fd89c83c.
 
 [params]
 
-loop=true
+loop=false
 loop_offset=0
