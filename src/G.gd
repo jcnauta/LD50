@@ -29,7 +29,7 @@ const guy_imgs = {
     "penguin": preload("res://img/Penguin.png"),
    }
 
-const money_per_turn = 10
+const money_per_turn = 0
 const money_per_guy = 5
 const money_per_balloon = 15
 const water_fraction = 0.3
@@ -51,7 +51,7 @@ const levels = [
 var level_info
 
 func generate_level_info(level_idx):
-    seed(0)
+    seed(level_idx)
     level_info = levels[level_idx]
     var difficulty = level_info.difficulty
     level_info.street_fraction = 0.40 * (0.4 + 0.6 * clamp(0.01 * difficulty, 0.0, 1.0))
