@@ -87,6 +87,8 @@ func set_guy_type(new_type):
 func update_path():
     full_path = []
     var date_path = city.shortest_path(coord, dest_coord)
+    if date_path == null:
+        return null
     move_path = date_path.slice(0, min(tile_speed, len(date_path) - 1))
     var icecream_path = city.shortest_path(move_path, null, G.max_icecream_path_length, true)
     if icecream_path != null:

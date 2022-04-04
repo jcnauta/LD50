@@ -26,11 +26,32 @@ var roadblock_preview
 func pos_to_float_coord(pos):
     return pos / G.tile_dim
 
-func random_passable_coord():
-    return passable_coords[randi() % len(passable_coords)]
+func on_edge(coord):
+    if coord.x == 0 or coord.x == G.grid_dim - 1 or \
+        coord.y == 0 or coord.y == G.grid_dim - 1:
+            return true
+    return false
+
+func random_passable_coord(avoid_edge = true):
+    var start_idx = randi() % len(passable_coords)
+    var candidate = passable_coords[start_idx]
+    if not avoid_edge:
+        return candidate
+    else:
+        for offset in range(len(passable_coords)):
+            if on_edge(candidate):
+                offset += 1
+                candidate = passable_coords[(start_idx + offset) % len(passable_coords)]
+            else:
+                return candidate
+    return null
 
 func random_non_edge_coord():
     return Vector2(1 + randi() % (G.grid_dim - 2), 1 + randi() % (G.grid_dim - 2))
+
+func random_street_len():
+    return G.level_info["min_street_length"] + randi() % \
+        (G.level_info["max_street_length"] - G.level_info["min_street_length"]) 
 
 func tile_at_coord(coord):
     if coord.y >= len(tiles):
@@ -76,39 +97,54 @@ func generate_street():
     # For fixed number of iterations, pick unpassable tile
     # and try to extend street segment to existing passable.
     # Guarantees connectedness of the final street grid.
-    for _generate_try in range(50):
+    var street_len = random_street_len()
+    for _generate_try in range(100):
         # Pick unpassable coordinate to start from
         var start_coord = null
-        for _try_unpassable in range(30):
+        for _try_unpassable in range(100):
             start_coord = random_non_edge_coord()
-            if not has_unpassable_neighborhood(start_coord):
-                continue
+            if has_unpassable_neighborhood(start_coord):
+                # no roads 4-around, perfect
+                break
         if start_coord == null or not has_unpassable_neighborhood(start_coord):
             continue
-        # Generate segment from here, in both directions
+        # Generate segment from here, in both directions.
+        # Only add at the end if it connects nicely
         var dir = G.random_dir()
-        var total_segment = []
+        var total_segment = [start_coord]
+        var half_street_len = street_len / 2
+        var is_connected = false
+#        print("creating raod from")
+#        print(start_coord)
+#        print("strlen " + str(street_len) + ", two halves")
         for _both_dirs in range(2):
-            var segment = [start_coord]
+            # Ensure correct street length target
+            if street_len % 2 == 0:
+                if _both_dirs == 1:
+                    half_street_len -= 1
+            else:
+                half_street_len = floor(half_street_len)
             dir = -dir
+            var half_segment = []
             var this_coord = add_coords(start_coord, dir)
-            for _tile_idx in range(G.level_info["min_street_length"] + randi() % \
-                    (G.level_info["max_street_length"] - G.level_info["min_street_length"])):
-                segment.append(this_coord)
+            for _tile_idx in range(half_street_len):
+                if not may_become_passable(this_coord):
+                    break
+                half_segment.append(this_coord)
                 if has_passable_neighbor(this_coord):
                     # Reached the street network!
-                    if may_become_passable(this_coord):
-                        # Only add this segment if the connection is good
-                        add_street_segment(segment)
-                        total_segment.append_array(segment)
+                    is_connected = true
                     break
-                else:
-                    this_coord = add_coords(this_coord, dir)
-            if passable_coords.empty():
-                # The first segment does not need to connect to the network
-                total_segment.append_array(segment)
-        add_street_segment(total_segment)
-        return total_segment
+                this_coord = add_coords(this_coord, dir)
+            # The half_segment does not violate any rules, but may not be connected
+            total_segment.append_array(half_segment)
+        if passable_coords.empty():
+            is_connected = true
+        if is_connected:
+#            print("with street len " + str(street_len) + " generated segment of " + str(len(total_segment)))
+            add_street_segment(total_segment)
+            return total_segment
+    print("ret null")
     return null
 
 func add_street_segment(segment):
@@ -118,44 +154,66 @@ func add_street_segment(segment):
         tile.set_passable(true)
         passable_coords.append(coord)
 
-func generate_street_core(max_n_streets):
+func generate_street_core(street_frac):
     # Create some streets to start with, before generating with the other method
     var start_coord = random_non_edge_coord()
     var core_complete = false
-    var n_streets = 0
-    var dir = G.random_dir()
-    while not core_complete:
-        var street_length = G.level_info["min_street_length"] + randi() % \
-                    (G.level_info["max_street_length"] - G.level_info["min_street_length"])
-        var old_dir = dir
-        while dir == -old_dir or dir == old_dir:
-            dir = G.random_dir()
+    var failsafe = 100
+    while true:
+        var street_len = random_street_len()
         var segment = []
+        if len(passable_coords) > 0:
+            start_coord = random_passable_coord(true)
+        var dir = G.random_dir()
         var this_coord = add_coords(start_coord, dir)
-        for i in range(street_length):
+        if not may_become_passable(this_coord):
+            continue
+        var made_street = false
+        for i in range(street_len):
             if may_become_passable(this_coord) and segment.find(this_coord) == -1:
                 segment.append(this_coord)
+                if has_passable_neighbor(this_coord) and len(segment) > 1:
+                    # Reached the street network from street network
+                    break
                 this_coord = add_coords(this_coord, dir)
             else:
-                # Reached the street network, core is complete!
-                # Only add this segment if the connection is good
-                add_street_segment(segment)
-                n_streets += 1
-                core_complete = true
                 break
-        if not core_complete:
+        if len(segment) > 0:
             add_street_segment(segment)
-            n_streets += 1
-            if max_n_streets == n_streets:
-                core_complete = true
+        else:
+#            if len(segment) == 1:  # Do not fail on "parallel street attempts"
+#                print(start_coord)
+#                print(this_coord)
+#                print(dir)
+            failsafe -= 1
+            if failsafe == 0:
+                print("Street core generation failed to complete")
                 break
-        start_coord = segment.back()
-    return n_streets
+        if street_fraction() >= G.street_core_frac:
+            break
+    print("failsafe at end of core generation: " + str(failsafe))
 
-func generate_streets(n_tries):
-    n_tries -= generate_street_core(n_tries)
-    for _add_street_iter in range(n_tries):
-        generate_street()
+func street_fraction():
+    return float(len(passable_coords)) / G.total_tiles
+
+func generate_streets(street_frac):
+    generate_street_core(street_frac)
+    print("After core generation, " + str(len(passable_coords)) + " street tiles (fraction " + \
+            str(street_fraction()) + "/" + str(G.street_core_frac) + ")")
+    var gen_fails = 0
+    var failstop = 100
+    while street_fraction() < G.level_info.street_fraction:
+        var success = generate_street()
+        if not success:
+            gen_fails += 1
+            if gen_fails == failstop:
+                break
+    if gen_fails == failstop:
+        print("Could not generate enough street.")
+        print("Current fraction: " + str(street_fraction()))
+        print("Target fraction:  " + str(G.level_info.street_fraction))
+    print("Total street tiles: " + str(len(passable_coords)) + "/" + str(G.tile_dim * G.tile_dim) + \
+            " (fraction " + str(street_fraction()) + "/" + str(G.level_info.street_fraction) + ")")
 
 func reset_city():
     var child_containers = [$Tiles, $Icecreams, $Roadblocks, $Guys]
@@ -182,7 +240,7 @@ func generate_water():
     while len(water_tiles) < water_goal:
         var new_water = null
         var house_tile_idx = null
-        if len(fresh_water) > 0 and randf() < 0.9:
+        if len(fresh_water) > 0 and randf() < 0.92:
             # Try to create new water from water pool
             var fresh_water_idx = randi() % len(fresh_water)
             for d in G.dirs4:
@@ -216,7 +274,7 @@ func generate_city(level_nr):
             new_tile.set_type("house")
             new_row.append(new_tile)
         tiles.append(new_row)
-    generate_streets(G.levels[level_nr - 1].streets)
+    generate_streets(G.levels[level_nr - 1].street_fraction)
     generate_water()
     # Actually add tiles
     for row in tiles:
@@ -323,11 +381,11 @@ func unblockable_paths(block_coord):
                 must_paths.append(current_path)
     return must_paths
 
-func random_passable():
-    var coord = passable_coords[randi() % len(passable_coords)]
+func random_passable_without_stuff():
+    var coord = random_passable_coord(false)
     var safety = 100
     while coord in date_coords or coord in spawn_coords:
-        coord = passable_coords[randi() % len(passable_coords)]
+        coord = random_passable_coord(false)
         safety -= 1
         if safety == 0:
             return null
@@ -338,8 +396,8 @@ func add_guys(n_guys):
         var date_coord
         var spawn_coord
         for _try_different in range(4):
-            date_coord = random_passable()
-            spawn_coord = random_passable()
+            date_coord = random_passable_without_stuff()
+            spawn_coord = random_passable_without_stuff()
             if date_coord != null and spawn_coord != null and (date_coord != spawn_coord):
                 break
         if date_coord == null or spawn_coord == null or (date_coord == spawn_coord):
