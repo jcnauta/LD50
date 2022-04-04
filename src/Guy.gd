@@ -14,6 +14,7 @@ var timeout = 0.05
 var city
 var full_path = null  # full path to destination
 var move_path = null  # partial path only for the next move
+var icecream_path = null
 var walk_prev_idx = null
 var walk_next_idx = null
 var animate_to_move_coord = false
@@ -42,6 +43,7 @@ const love_sounds = {
 
 func _ready():
     $PathPreview.set_as_toplevel(true)
+    $IcecreamPreview.set_as_toplevel(true)
 
 func init(new_coord, new_city, new_date, new_guy_type):
     city = new_city
@@ -108,9 +110,9 @@ func update_path():
     if date_path == null:
         return null
     move_path = date_path.slice(0, min(tile_speed, len(date_path) - 1))
-    var icecream_path = city.shortest_path(move_path, null, G.max_icecream_path_length, true)
-    if icecream_path != null:
-        full_path.append_array(icecream_path)
+    var move_icecream_path = city.shortest_path(move_path, null, G.max_icecream_path_length, true)
+    if move_icecream_path != null:
+        full_path.append_array(move_icecream_path)
     if dest_coord != null:
         if len(full_path) == 0:
             full_path.append_array(date_path)
@@ -129,6 +131,19 @@ func update_path():
         walk_prev_idx = null
         walk_next_idx = null
         turn_processed = true
+
+func show_icecream_path_preview(maybe_icecream_coord):
+    print("showing")
+    icecream_path = city.shortest_path(full_path, maybe_icecream_coord, G.max_icecream_path_length, false)
+    for c in $IcecreamPreview.get_children():
+        c.queue_free()
+    if icecream_path != null:
+        for c in icecream_path:
+            var path_dot = ColorRect.new()
+            path_dot.rect_size = small_dot * Vector2(1, 1)
+            path_dot.rect_position = c * G.tile_dim + Vector2(13, 13)
+            path_dot.modulate = Color(1, 1, 1, 0.8)
+            $IcecreamPreview.add_child(path_dot)
 
 func show_path_preview():
     var turns_left = 1

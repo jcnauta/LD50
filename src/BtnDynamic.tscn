@@ -1,8 +1,10 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://fonts/Mukta/Mukta-Regular.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://img/yellow_button.png" type="Texture" id=2]
 [ext_resource path="res://img/icecream.png" type="Texture" id=3]
+[ext_resource path="res://img/orange_button.png" type="Texture" id=4]
+[ext_resource path="res://img/orange_button_small.png" type="Texture" id=5]
 
 [sub_resource type="DynamicFont" id=2]
 size = 28
@@ -13,6 +15,8 @@ margin_right = 160.0
 margin_bottom = 60.0
 rect_min_size = Vector2( 160, 60 )
 texture_normal = ExtResource( 2 )
+texture_pressed = ExtResource( 5 )
+texture_hover = ExtResource( 4 )
 expand = true
 
 [node name="TextureButton" type="HBoxContainer" parent="."]

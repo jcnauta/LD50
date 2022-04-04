@@ -6,19 +6,21 @@ var button_to_level = {}
 
 func _ready():
     pause_mode = Node.PAUSE_MODE_PROCESS
+    var game = get_node("/root/Game")
+    $CloseBtn.connect("button_up", game, "toggle_menu")
 
 func show_scores():
-#    money_per_level = {
-#        1: 2, 
-#        2: 2,
-#        3: 243,
-#        4: 947,
-##        5: 13,
-##        6: 35,
-##        7: 21,
-##        8: 8,
-##        9: 14
-#       }
+    G.money_per_level = {
+        1: 2, 
+        2: 2,
+        3: 243,
+        4: 947,
+        5: 13,
+        6: 35,
+        7: 21,
+        8: 8,
+        9: 14
+       }
     if get_tree().paused:
         $CloseBtn.show()
     else:

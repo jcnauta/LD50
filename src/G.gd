@@ -37,8 +37,8 @@ const street_core_frac = 0.15
 
 # Set difficulties in [1, 100]
 const levels = [
+    {"seed": 2, "difficulty": 100}, # score 140
     {"seed": 6, "difficulty": 1},  # score 150
-    {"seed": 2, "difficulty": 100},
     {"seed": 3, "difficulty": 50},
     {"seed": 4, "difficulty": 10},
     {"seed": 5, "difficulty": 20},  # score 165
@@ -51,9 +51,9 @@ const levels = [
 var level_info
 
 func generate_level_info(level_idx):
+    seed(0)
     level_info = levels[level_idx]
     var difficulty = level_info.difficulty
-#    level_info.streets = 8 + ceil(0.08 * difficulty * sqrt(difficulty))
     level_info.street_fraction = 0.40 * (0.4 + 0.6 * clamp(0.01 * difficulty, 0.0, 1.0))
     level_info.min_street_length = int(4 + floor(0.1 * (100 - difficulty)))
     level_info.max_street_length = int(10 + floor(0.1 * (100 - difficulty)))

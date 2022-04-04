@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=2]
+[gd_scene load_steps=38 format=2]
 
 [ext_resource path="res://src/Scores.gd" type="Script" id=1]
 [ext_resource path="res://fonts/Mukta/Mukta-Regular.ttf" type="DynamicFontData" id=2]
@@ -16,9 +16,13 @@
 [ext_resource path="res://src/Btn.tscn" type="PackedScene" id=14]
 [ext_resource path="res://src/BtnIcecream.gd" type="Script" id=15]
 [ext_resource path="res://img/roadblock.png" type="Texture" id=16]
-[ext_resource path="res://img/placeholder.png" type="Texture" id=17]
+[ext_resource path="res://img/x_normal.png" type="Texture" id=17]
 [ext_resource path="res://src/BtnRestart.gd" type="Script" id=18]
 [ext_resource path="res://img/yellow_button.png" type="Texture" id=19]
+[ext_resource path="res://img/x_hover_over.png" type="Texture" id=20]
+[ext_resource path="res://img/x_clicked.png" type="Texture" id=21]
+[ext_resource path="res://img/orange_button.png" type="Texture" id=22]
+[ext_resource path="res://img/orange_button_small.png" type="Texture" id=23]
 
 [sub_resource type="DynamicFont" id=1]
 size = 32
@@ -28,12 +32,40 @@ font_data = ExtResource( 5 )
 size = 18
 font_data = ExtResource( 2 )
 
+[sub_resource type="InputEventKey" id=10]
+scancode = 49
+
+[sub_resource type="ShortCut" id=11]
+shortcut = SubResource( 10 )
+
+[sub_resource type="InputEventKey" id=12]
+scancode = 50
+
+[sub_resource type="ShortCut" id=13]
+shortcut = SubResource( 12 )
+
+[sub_resource type="InputEventKey" id=8]
+scancode = 16777217
+
+[sub_resource type="ShortCut" id=9]
+shortcut = SubResource( 8 )
+
+[sub_resource type="InputEventKey" id=14]
+scancode = 82
+
+[sub_resource type="ShortCut" id=15]
+shortcut = SubResource( 14 )
+
 [sub_resource type="DynamicFont" id=5]
-size = 30
+size = 40
+extra_spacing_top = -10
+extra_spacing_bottom = -10
 font_data = ExtResource( 10 )
 
 [sub_resource type="DynamicFont" id=6]
-size = 30
+size = 40
+extra_spacing_top = -10
+extra_spacing_bottom = -10
 font_data = ExtResource( 10 )
 
 [sub_resource type="DynamicFont" id=3]
@@ -61,7 +93,7 @@ margin_bottom = 890.0
 rect_min_size = Vector2( 160, 880 )
 
 [node name="Title" type="RichTextLabel" parent="VBoxContainer"]
-margin_right = 164.0
+margin_right = 160.0
 margin_bottom = 90.0
 custom_fonts/normal_font = SubResource( 1 )
 bbcode_enabled = true
@@ -72,13 +104,13 @@ scroll_active = false
 
 [node name="HSeparator" type="HSeparator" parent="VBoxContainer"]
 margin_top = 94.0
-margin_right = 164.0
+margin_right = 160.0
 margin_bottom = 114.0
 custom_constants/separation = 20
 
 [node name="LevelInfo" type="RichTextLabel" parent="VBoxContainer"]
 margin_top = 118.0
-margin_right = 164.0
+margin_right = 160.0
 margin_bottom = 182.0
 custom_fonts/normal_font = SubResource( 7 )
 bbcode_enabled = true
@@ -90,20 +122,20 @@ fit_content_height = true
 
 [node name="HSeparator5" type="HSeparator" parent="VBoxContainer"]
 margin_top = 186.0
-margin_right = 164.0
+margin_right = 160.0
 margin_bottom = 206.0
 custom_constants/separation = 20
 
 [node name="IcecreamBtn" parent="VBoxContainer" instance=ExtResource( 9 )]
 margin_top = 210.0
-margin_right = 164.0
 margin_bottom = 270.0
+shortcut = SubResource( 11 )
 script = ExtResource( 15 )
 
 [node name="RoadblockBtn" parent="VBoxContainer" instance=ExtResource( 9 )]
 margin_top = 274.0
-margin_right = 164.0
 margin_bottom = 334.0
+shortcut = SubResource( 13 )
 script = ExtResource( 11 )
 
 [node name="TextureRect" parent="VBoxContainer/RoadblockBtn/TextureButton" index="1"]
@@ -111,23 +143,25 @@ rect_min_size = Vector2( 30, 40 )
 texture = ExtResource( 16 )
 
 [node name="EndTurnBtn" parent="VBoxContainer" instance=ExtResource( 14 )]
+modulate = Color( 0.901961, 0.85098, 0.901961, 0.901961 )
 margin_top = 338.0
-margin_right = 164.0
 margin_bottom = 398.0
 texture_normal = ExtResource( 19 )
+texture_pressed = ExtResource( 23 )
+texture_hover = ExtResource( 22 )
 script = ExtResource( 4 )
 
 [node name="HSeparator6" type="HSeparator" parent="VBoxContainer"]
 margin_top = 402.0
-margin_right = 164.0
+margin_right = 160.0
 margin_bottom = 422.0
 custom_constants/separation = 20
 
 [node name="MenuBtn" parent="VBoxContainer" instance=ExtResource( 14 )]
 pause_mode = 2
 margin_top = 426.0
-margin_right = 164.0
 margin_bottom = 486.0
+shortcut = SubResource( 9 )
 script = ExtResource( 13 )
 
 [node name="Text" parent="VBoxContainer/MenuBtn" index="0"]
@@ -136,8 +170,8 @@ text = "MENU"
 
 [node name="RestartBtn" parent="VBoxContainer" instance=ExtResource( 14 )]
 margin_top = 490.0
-margin_right = 164.0
 margin_bottom = 550.0
+shortcut = SubResource( 15 )
 script = ExtResource( 18 )
 
 [node name="Text" parent="VBoxContainer/RestartBtn" index="0"]
@@ -146,38 +180,37 @@ text = "RESTART"
 
 [node name="HSeparator4" type="HSeparator" parent="VBoxContainer"]
 margin_top = 554.0
-margin_right = 164.0
+margin_right = 160.0
 margin_bottom = 574.0
 custom_constants/separation = 20
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
 margin_top = 578.0
-margin_right = 164.0
-margin_bottom = 639.0
+margin_right = 160.0
+margin_bottom = 627.0
 
 [node name="TextureRect" type="TextureRect" parent="VBoxContainer/HBoxContainer"]
-margin_right = 80.0
-margin_bottom = 61.0
-rect_min_size = Vector2( 80, 20 )
+margin_right = 60.0
+margin_bottom = 40.0
+rect_min_size = Vector2( 60, 40 )
+size_flags_vertical = 0
 texture = ExtResource( 8 )
-stretch_mode = 4
+expand = true
+stretch_mode = 6
 
 [node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/HBoxContainer"]
-margin_left = 84.0
-margin_right = 164.0
-margin_bottom = 61.0
+margin_left = 64.0
+margin_right = 124.0
+margin_bottom = 49.0
 custom_constants/separation = 0
 
 [node name="Control" type="Control" parent="VBoxContainer/HBoxContainer/VBoxContainer"]
-margin_right = 80.0
-margin_bottom = 10.0
-rect_min_size = Vector2( 0, 10 )
+margin_right = 60.0
 
 [node name="Money" type="RichTextLabel" parent="VBoxContainer/HBoxContainer/VBoxContainer"]
-margin_top = 10.0
-margin_right = 80.0
-margin_bottom = 61.0
-rect_min_size = Vector2( 80, 0 )
+margin_right = 60.0
+margin_bottom = 49.0
+rect_min_size = Vector2( 60, 0 )
 custom_fonts/normal_font = SubResource( 5 )
 bbcode_enabled = true
 bbcode_text = "10$"
@@ -185,27 +218,27 @@ text = "10$"
 fit_content_height = true
 
 [node name="HSeparator3" type="HSeparator" parent="VBoxContainer"]
-margin_top = 643.0
-margin_right = 164.0
-margin_bottom = 663.0
-custom_constants/separation = 20
+margin_top = 631.0
+margin_right = 160.0
+margin_bottom = 635.0
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer"]
-margin_top = 667.0
-margin_right = 164.0
-margin_bottom = 721.0
+margin_top = 639.0
+margin_right = 160.0
+margin_bottom = 688.0
 
 [node name="TextureRect" type="TextureRect" parent="VBoxContainer/HBoxContainer2"]
-margin_right = 80.0
-margin_bottom = 54.0
-rect_min_size = Vector2( 80, 20 )
+margin_right = 60.0
+margin_bottom = 49.0
+rect_min_size = Vector2( 60, 40 )
 texture = ExtResource( 12 )
+expand = true
 stretch_mode = 6
 
 [node name="TurnCounter" type="RichTextLabel" parent="VBoxContainer/HBoxContainer2"]
-margin_left = 84.0
-margin_right = 164.0
-margin_bottom = 54.0
+margin_left = 64.0
+margin_right = 144.0
+margin_bottom = 49.0
 rect_min_size = Vector2( 80, 0 )
 custom_fonts/normal_font = SubResource( 6 )
 bbcode_enabled = true
@@ -214,18 +247,17 @@ text = "0"
 fit_content_height = true
 
 [node name="HSeparator2" type="HSeparator" parent="VBoxContainer"]
-margin_top = 725.0
-margin_right = 164.0
-margin_bottom = 745.0
+margin_top = 692.0
+margin_right = 160.0
+margin_bottom = 712.0
 custom_constants/separation = 20
 
 [node name="Prognoses" parent="VBoxContainer" instance=ExtResource( 3 )]
-margin_top = 749.0
-margin_right = 164.0
-margin_bottom = 749.0
+margin_top = 716.0
+margin_bottom = 716.0
 
 [node name="Scores" type="Control" parent="."]
-visible = false
+pause_mode = 2
 margin_left = -775.0
 margin_top = 300.0
 margin_right = -735.0
@@ -240,13 +272,6 @@ margin_bottom = 300.0
 texture = ExtResource( 6 )
 expand = true
 stretch_mode = 1
-
-[node name="CloseBtn" type="TextureButton" parent="Scores"]
-margin_left = 10.0
-margin_top = 10.0
-margin_right = 50.0
-margin_bottom = 50.0
-texture_normal = ExtResource( 17 )
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Scores"]
 margin_right = 640.0
@@ -345,6 +370,19 @@ margin_left = 560.0
 margin_right = 640.0
 margin_bottom = 84.0
 rect_min_size = Vector2( 80, 60 )
+
+[node name="CloseBtn" type="TextureButton" parent="Scores"]
+pause_mode = 2
+margin_left = 10.0
+margin_top = 10.0
+margin_right = 50.0
+margin_bottom = 50.0
+rect_min_size = Vector2( 40, 40 )
+rect_clip_content = true
+texture_normal = ExtResource( 17 )
+texture_pressed = ExtResource( 21 )
+texture_hover = ExtResource( 20 )
+expand = true
 
 [editable path="VBoxContainer/RoadblockBtn"]
 [editable path="VBoxContainer/MenuBtn"]

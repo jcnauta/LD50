@@ -24,6 +24,7 @@ var turn_processed = true
 var level_lost = false
 var icecream_preview
 var roadblock_preview
+var hovered_tile = null
 
 var prognoses = {}
 
@@ -271,8 +272,8 @@ func generate_water():
             assert(new_water == null)
 
 func generate_city(level_nr):
-    reset_city()
     seed(G.levels[level_nr - 1].seed)
+    reset_city()
     for row in range(G.grid_dim):
         var new_row = []
         for col in range(G.grid_dim):
@@ -316,8 +317,7 @@ func shortest_path(c0, c1, max_length=INF, find_icecream=false):
     #   Returns an empty path if c1 is on c0
     # Returns null if no path of length < max_length is possible
     # or c0 or c1 is null and find_icecream is false
-    
-    if c0 == c1:
+    if typeof(c0) == TYPE_VECTOR2 and c0 == c1:
         return []
     elif c0 == null or (c1 == null and not find_icecream):
         return null
@@ -347,7 +347,7 @@ func shortest_path(c0, c1, max_length=INF, find_icecream=false):
                 path.append(prev.coord)
                 if prev.path_length == 0:
                     path.invert()
-                    if typeof(c0) == TYPE_ARRAY:
+                    if typeof(c0) == TYPE_ARRAY and find_icecream:
                         # Add prefix of c0 until the start of the shortest path.
                         var branch_off_idx = c0.find(prev.coord)
                         if branch_off_idx > 0:
@@ -454,8 +454,18 @@ func tile_at_pos(mouse_pos):
 
 func passable_under_mouse():
     var mouse_pos = get_viewport().get_mouse_position()
-    var hovered_tile = tile_at_pos(mouse_pos)
-    if hovered_tile != null and hovered_tile.coord in passable_coords:
+    var new_hovered_tile = tile_at_pos(mouse_pos)
+    if new_hovered_tile != hovered_tile:
+        hovered_tile = new_hovered_tile
+        if hovered_tile != null:
+            if G.click_mode == "icecream":
+                for guy in $Guys.get_children():
+                    guy.show_icecream_path_preview(hovered_tile.coord)
+            if hovered_tile.coord in passable_coords:
+                return hovered_tile
+        else:
+            return null
+    elif hovered_tile != null and hovered_tile.coord in passable_coords:
         return hovered_tile
     else:
         return null
