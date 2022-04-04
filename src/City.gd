@@ -272,7 +272,7 @@ func generate_water():
             assert(new_water == null)
 
 func generate_city(level_nr):
-    seed(G.levels[level_nr - 1].seed)
+    seed(G.level_info.seed)
     reset_city()
     for row in range(G.grid_dim):
         var new_row = []

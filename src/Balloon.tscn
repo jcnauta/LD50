@@ -35,6 +35,7 @@ playing = true
 centered = false
 
 [node name="Money" type="Sprite" parent="."]
+visible = false
 texture = ExtResource( 3 )
 centered = false
 

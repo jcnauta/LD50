@@ -55,11 +55,21 @@ func powerup_change():
 func play_level(level_to_play):
     G.level_nr = level_to_play
     G.money = 0
-    G.generate_level_info(G.levels[G.level_nr - 1])
+    var seed_info
+    if typeof(level_to_play) == TYPE_STRING and level_to_play == "special":
+        seed_info = {
+            "seed": G.special_seed,
+            "difficulty": G.special_difficulty,
+            "goal": G.special_goal
+        }
+    else:
+        seed_info = G.levels[G.level_nr]
+    G.generate_level_info(seed_info)
     var level_info = G.level_info
     G.roadblocks = level_info.roadblocks
     G.icecreams = level_info.icecreams
     G.just_paused = false
+    get_tree().paused = false
     $UI.reset()
     $UI.hide_scores()
     $City.generate_city(G.level_nr)

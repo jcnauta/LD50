@@ -50,7 +50,7 @@ func set_prognoses(progs):
 
 func update_level_info():
     var text = "[center]Neighborhood " + str(G.level_nr)
-    if G.money_per_level.has(G.level_nr):
+    if G.money_per_level.has(G.level_nr) and G.money_per_level[G.level_nr] != -1:
         text +=  "\nHighscore $" + str(G.money_per_level[G.level_nr])
     text += "[/center]"
     $VBoxContainer/LevelInfo.bbcode_text = text

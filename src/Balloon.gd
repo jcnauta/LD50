@@ -20,6 +20,7 @@ func collect():
     if collected:
         return
     collected = true
+    $Money.show()
     $Money/Kaching.play()
     $Tween.interpolate_property($SpriteAnimation, "modulate",
         Color(1, 1, 1, 1), Color(1, 1, 1, 0), 1.0,
