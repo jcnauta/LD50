@@ -4,5 +4,10 @@ func update():
     $TextureButton/MarginContainer2/Charges.bbcode_text = "x" + str(G.roadblocks)
     if G.roadblocks == 0:
         self.disabled = true
+        self.modulate = Color(0.5, 0.5, 0.8, 0.8)
     else:
         self.disabled = false
+        if G.click_mode == "roadblock":
+            self.modulate = Color(1, 1, 1, 1)
+        else:
+            self.modulate = Color(0.9, 0.85, 0.9, 0.9)

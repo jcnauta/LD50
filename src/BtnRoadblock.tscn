@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://fonts/Mukta/Mukta-Regular.ttf" type="DynamicFontData" id=1]
-[ext_resource path="res://img/Background_ice_cream.png" type="Texture" id=2]
+[ext_resource path="res://img/yellow_button.png" type="Texture" id=2]
 [ext_resource path="res://img/roadblock.png" type="Texture" id=3]
 [ext_resource path="res://src/BtnRoadblock.gd" type="Script" id=4]
 
@@ -23,14 +23,16 @@ rect_min_size = Vector2( 150, 60 )
 size_flags_horizontal = 0
 
 [node name="MarginContainer" type="MarginContainer" parent="TextureButton"]
-margin_right = 50.0
+margin_right = 58.0
 margin_bottom = 60.0
 mouse_filter = 1
 custom_constants/margin_top = 8
+custom_constants/margin_left = 8
 
 [node name="RichTextLabel" type="RichTextLabel" parent="TextureButton/MarginContainer"]
+margin_left = 8.0
 margin_top = 8.0
-margin_right = 50.0
+margin_right = 58.0
 margin_bottom = 60.0
 rect_min_size = Vector2( 50, 50 )
 mouse_filter = 1
@@ -43,18 +45,17 @@ text = "USE"
 fit_content_height = true
 
 [node name="TextureRect" type="TextureRect" parent="TextureButton"]
-margin_left = 54.0
-margin_right = 114.0
+margin_left = 62.0
+margin_right = 102.0
 margin_bottom = 60.0
-rect_min_size = Vector2( 60, 50 )
+rect_min_size = Vector2( 40, 50 )
 rect_clip_content = true
 texture = ExtResource( 3 )
-expand = true
 stretch_mode = 6
 
 [node name="MarginContainer2" type="MarginContainer" parent="TextureButton"]
-margin_left = 118.0
-margin_right = 158.0
+margin_left = 106.0
+margin_right = 146.0
 margin_bottom = 60.0
 mouse_filter = 1
 custom_constants/margin_top = 8

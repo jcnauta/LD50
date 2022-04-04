@@ -1,8 +1,9 @@
 extends Node2D
 
 
-const house_img = preload("res://img/City_tiles_4_house_types.png")
-const house_img_pale = preload("res://img/City_tiles_4_house_types_pale.png")
+const house_img_1 = preload("res://img/spreadsheets_houses/houses_spreadsheet_1.png")
+const house_img_2 = preload("res://img/spreadsheets_houses/houses_spreadsheet_2.png")
+const house_img_3 = preload("res://img/spreadsheets_houses/houses_spreadsheet_3.png")
 const water_img = preload("res://img/River_all.png")
 const road_img = preload("res://img/Street_all_dark green.png")
 
@@ -28,12 +29,15 @@ func init(init_coord):
 func _ready():
     city = get_node("/root/Game/City")
     
-    house_img.flags = 3
-    house_img_pale.flags = 3
-#    if randf() < 0.5:
-#        $SpriteHouse.texture = house_img
-#    else:
-    $SpriteHouse.texture = house_img_pale
+    house_img_1.flags = 3
+    house_img_2.flags = 3
+    house_img_3.flags = 3
+    if randf() < 0.33:
+        $SpriteHouse.texture = house_img_1
+    elif randf() < 0.5:
+        $SpriteHouse.texture = house_img_2
+    else:
+        $SpriteHouse.texture = house_img_3
     $SpriteHouse.visible = true
     
     water_img.flags = 3

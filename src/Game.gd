@@ -10,6 +10,7 @@ var money = 0
 func _ready():
     $City.connect("lose_level", self, "lost_level")
     $City.connect("powerup_change", self, "powerup_change")
+    $UI.connect("powerup_change", self, "powerup_change")
     $UI/Scores.connect("play_level", self, "play_level")
     play_level(level_nr)
 
@@ -43,6 +44,7 @@ func powerup_change():
 
 func play_level(level_to_play):
     level_nr = level_to_play
+    G.generate_level_info(level_nr - 1)
     var level_info = G.levels[level_nr - 1]
     G.roadblocks = level_info.roadblocks
     G.icecreams = level_info.icecreams

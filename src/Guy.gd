@@ -3,7 +3,7 @@ extends Node2D
 var coord = null
 var dest_coord = null
 var move_coord = null
-var tile_speed = 2
+var tile_speed = 6
 var tile_speed_increase = 2
 var animate_speed = 20
 var pixel_speed = animate_speed * G.tile_dim

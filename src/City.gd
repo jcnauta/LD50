@@ -10,8 +10,6 @@ var HeartScene = preload("res://src/Heart.tscn")
 var IcecreamScene = preload("res://src/Icecream.tscn")
 var RoadblockScene = preload("res://src/Roadblock.tscn")
 
-const street_len_min = 6
-const street_len_max = 16
 const choice_zero = 10
 const generate_timeout_max = 0.2
 
@@ -22,7 +20,6 @@ var spawn_coords = []
 var generate_timeout = generate_timeout_max
 var turn_processed = true
 var level_lost = false
-var click_mode = "roadblock" # {icecream, roadblock, dateswap, null}
 var icecream_preview
 var roadblock_preview
 
@@ -32,8 +29,8 @@ func pos_to_float_coord(pos):
 func random_passable_coord():
     return passable_coords[randi() % len(passable_coords)]
 
-func random_coord():
-    return Vector2(randi() % G.grid_dim, randi() % G.grid_dim)
+func random_non_edge_coord():
+    return Vector2(1 + randi() % (G.grid_dim - 2), 1 + randi() % (G.grid_dim - 2))
 
 func tile_at_coord(coord):
     if coord.y >= len(tiles):
@@ -79,11 +76,11 @@ func generate_street():
     # For fixed number of iterations, pick unpassable tile
     # and try to extend street segment to existing passable.
     # Guarantees connectedness of the final street grid.
-    for _generate_try in range(100):
+    for _generate_try in range(50):
         # Pick unpassable coordinate to start from
         var start_coord = null
-        for _try_unpassable in range(10):
-            start_coord = random_coord()
+        for _try_unpassable in range(30):
+            start_coord = random_non_edge_coord()
             if not has_unpassable_neighborhood(start_coord):
                 continue
         if start_coord == null or not has_unpassable_neighborhood(start_coord):
@@ -95,7 +92,8 @@ func generate_street():
             var segment = [start_coord]
             dir = -dir
             var this_coord = add_coords(start_coord, dir)
-            for _tile_idx in range(street_len_min + randi() % (street_len_max - street_len_min)):
+            for _tile_idx in range(G.level_info["min_street_length"] + randi() % \
+                    (G.level_info["max_street_length"] - G.level_info["min_street_length"])):
                 segment.append(this_coord)
                 if has_passable_neighbor(this_coord):
                     # Reached the street network!
@@ -120,7 +118,42 @@ func add_street_segment(segment):
         tile.set_passable(true)
         passable_coords.append(coord)
 
+func generate_street_core(max_n_streets):
+    # Create some streets to start with, before generating with the other method
+    var start_coord = random_non_edge_coord()
+    var core_complete = false
+    var n_streets = 0
+    var dir = G.random_dir()
+    while not core_complete:
+        var street_length = G.level_info["min_street_length"] + randi() % \
+                    (G.level_info["max_street_length"] - G.level_info["min_street_length"])
+        var old_dir = dir
+        while dir == -old_dir or dir == old_dir:
+            dir = G.random_dir()
+        var segment = []
+        var this_coord = add_coords(start_coord, dir)
+        for i in range(street_length):
+            if may_become_passable(this_coord) and segment.find(this_coord) == -1:
+                segment.append(this_coord)
+                this_coord = add_coords(this_coord, dir)
+            else:
+                # Reached the street network, core is complete!
+                # Only add this segment if the connection is good
+                add_street_segment(segment)
+                n_streets += 1
+                core_complete = true
+                break
+        if not core_complete:
+            add_street_segment(segment)
+            n_streets += 1
+            if max_n_streets == n_streets:
+                core_complete = true
+                break
+        start_coord = segment.back()
+    return n_streets
+
 func generate_streets(n_tries):
+    n_tries -= generate_street_core(n_tries)
     for _add_street_iter in range(n_tries):
         generate_street()
 
@@ -308,7 +341,9 @@ func add_guys(n_guys):
             date_coord = random_passable()
             spawn_coord = random_passable()
             if date_coord != null and spawn_coord != null and (date_coord != spawn_coord):
-                break 
+                break
+        if date_coord == null or spawn_coord == null or (date_coord == spawn_coord):
+            continue
         date_coords.append(date_coord)
         spawn_coords.append(spawn_coord)
         # init adds date to tile
@@ -345,7 +380,7 @@ func set_mode(new_mode):
         icecream_preview.visible = true
     elif new_mode == "roadblock":
         roadblock_preview.visible = true
-    click_mode = new_mode
+    G.click_mode = new_mode
 
 func _ready():
     icecream_preview = $Preview/Icecream
@@ -377,28 +412,22 @@ func _process(_delta):
             emit_signal("city_turn_processed")
     
     var hovered_tile = passable_under_mouse()
-    if click_mode == "icecream" and hovered_tile != null:
+    if G.click_mode == "icecream" and hovered_tile != null:
         icecream_preview.position = hovered_tile.position
         icecream_preview.visible = true
     else:
         icecream_preview.visible = false
-    if click_mode == "roadblock" and hovered_tile != null:
+    if G.click_mode == "roadblock" and hovered_tile != null:
         roadblock_preview.position = hovered_tile.position
         roadblock_preview.visible = true
     else:
         roadblock_preview.visible = false
-        
-#    generate_timeout -= delta
-#    if generate_timeout < 0:
-#        print("generating")
-#        generate_timeout += generate_timeout_max
-#        generate_street()
 
 func _input(event):
     if event is InputEventMouseButton and event.button_index == BUTTON_LEFT and event.pressed:
         var hovered_tile = passable_under_mouse()
         if hovered_tile != null:
-            if click_mode == "icecream":
+            if G.click_mode == "icecream":
                 if hovered_tile.can_icecream():
                     var new_icecream = IcecreamScene.instance()
                     new_icecream.set_coord(hovered_tile.coord)
@@ -409,9 +438,9 @@ func _input(event):
                         guy.show_path_preview()
                     G.icecreams -= 1
                     if G.icecreams == 0:
-                        click_mode = null
+                        G.click_mode = null
                     emit_signal("powerup_change")
-            elif click_mode == "roadblock":
+            elif G.click_mode == "roadblock":
                 if hovered_tile.can_roadblock():
                     var prevent_paths = unblockable_paths(hovered_tile.coord)
                     if len(prevent_paths) > 0:
@@ -426,5 +455,5 @@ func _input(event):
                             guy.show_path_preview()
                         G.roadblocks -= 1
                         if G.roadblocks == 0:
-                            click_mode = null
+                            G.click_mode = null
                         emit_signal("powerup_change")
